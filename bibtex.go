@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"strings"
 
-	// My packages
-	"github.com/rsdoiel/tok"
+	// Caltech Library packages
+	"github.com/caltechlibrary/tok"
 )
 
 const (

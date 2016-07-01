@@ -25,8 +25,8 @@ import (
 	"strings"
 	"testing"
 
-	// My packages
-	"github.com/rsdoiel/tok"
+	// Caltech Library packages
+	"github.com/caltechlibrary/tok"
 )
 
 // TestBib tests the Bib tokenizer

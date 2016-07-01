@@ -27,7 +27,7 @@ import (
 	"path"
 
 	// This package
-	"github.com/rsdoiel/bibtex"
+	"github.com/caltechlibrary/bibtex"
 )
 
 var (
