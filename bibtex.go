@@ -127,11 +127,18 @@ func (element *Element) String() string {
 	var out []string
 
 	out = append(out, fmt.Sprintf("@%s{", element.Type))
-	for _, ky := range element.Keys {
-		out = append(out, fmt.Sprintf("    %s,", ky))
+	if len(element.Keys) > 0 {
+		for _, ky := range element.Keys {
+			if len(ky) > 0 {
+				out = append(out, fmt.Sprintf("    %s,", ky))
+			}
+		}
 	}
-	for ky, val := range element.Tags {
-		out = append(out, fmt.Sprintf("    %s = %s,", ky, val))
+
+	if len(element.Tags) > 0 {
+		for ky, val := range element.Tags {
+			out = append(out, fmt.Sprintf("    %s = %s,", ky, val))
+		}
 	}
 
 	out = append(out, fmt.Sprintf("}"))
