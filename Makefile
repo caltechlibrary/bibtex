@@ -2,10 +2,10 @@
 # Simple Makefile
 #
 build:
-	go build -o bin/mkbib cmds/mkbib/mkbib.go
+	go build -o bin/bibfilter cmds/bibfilter/bibfilter.go
 
 install:
-	env GOBIN=$(HOME)/bin go install cmds/mkbib/mkbib.go
+	env GOBIN=$(HOME)/bin go install cmds/bibfilter/bibfilter.go
 
 clean:
 	if [ -d bin ]; then rm -fR bin; fi
