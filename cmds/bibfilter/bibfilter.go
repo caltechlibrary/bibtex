@@ -107,6 +107,7 @@ func main() {
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
  `, appname)
+		os.Exit(0)
 	}
 
 	var (
