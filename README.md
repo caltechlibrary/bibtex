@@ -4,7 +4,28 @@
 
 # bibtex
 
-A quick and dirty BibTeX package. Includes a simple plain text to BibTeX parser.
+A quick and dirty BibTeX package. Includes a command line *bibfilter* tool for parsing and filter BibTeX entries.
+
+## bibfilter
+
+Output _my.bib_ file without comment entries
+
+```
+  bibfilter -exclude=comment my.bib
+```
+
+Output only articles from _my.bib_
+
+```
+    bibfilter -include=article my.bib
+```
+
+Output only articles and conference proceedings from _my.bib_
+
+```
+    bibfilter -include=article,inproceedings my.bib
+```
+
 
 ## Prior art
 
