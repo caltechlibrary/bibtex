@@ -1,9 +1,7 @@
 
-# next steps
+# possible next steps
 
-+ Write a bibfilter that lets you filter by types
-    + include types (e.g. show only articles and proceedings)
-    + exclude types (e.g. comments)
 + bibjson2bib so we can easily import BibJSON into JabRef
-+ Get mkbib working for parsing plain text into BibTeX
++ text2bib which can import plain text formatted citation and output a BibTeX file
++ api2bib would be a tool that can talk to public APIs like CrossRef, DataCite and ORCID and render a BibTeX from the JSON API response
 
