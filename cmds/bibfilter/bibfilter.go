@@ -4,7 +4,6 @@
 //
 // @author R. S. Doiel, <rsdoiel@caltech.edu>
 //
-//
 // Copyright (c) 2016, Caltech
 // All rights not granted herein are expressly reserved by Caltech.
 //
@@ -60,7 +59,7 @@ func main() {
 
  OPTIONS:
 
-`)
+`, appname)
 
 		flag.VisitAll(func(f *flag.Flag) {
 			fmt.Printf("    -%s %s\n", f.Name, f.Usage)
@@ -79,9 +78,9 @@ func main() {
 		fmt.Printf(`
  %s
  
- Copyright (c) 2016, R. S. Doiel
- All rights reserved.
- 
+ copyright (c) 2016, Caltech
+ All rights not granted herein are expressly reserved by Caltech.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
  
