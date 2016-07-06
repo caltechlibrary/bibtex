@@ -1,7 +1,7 @@
 
 # bibtex
 
-A quick and dirty BibTeX package. Includes a command line *bibfilter* tool for parsing and filter BibTeX entries.
+A Golang BibTeX package and *bibfilter* tool. *bibfilter* can parse and filter BibTeX entries.
 
 ## bibfilter
 
