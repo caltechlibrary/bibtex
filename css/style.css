@@ -94,6 +94,7 @@ nav div h2 {
 
 nav > ul {
      display: block;
+     list-style-type: none;
 }
 
 nav > ul li {
@@ -101,7 +102,7 @@ nav > ul li {
      padding-left: 0.24em;
      padding-right: 0.24em;
      text-align: left;
-     list-style: none;
+     list-style-type: none;
 }
 
 section {
@@ -115,6 +116,13 @@ section {
      padding-bottom: 0;
      padding-left: 1em;
      padding-right: 0;
+}
+
+section ul {
+    display: block;
+    list-style-type: square;
+    padding: 0;
+    margin-left: 1.24em;
 }
 
 section h2 {
