@@ -36,7 +36,7 @@ var (
 	showVersion bool
 	showLicense bool
 
-	include = "comment,string,article,book,booklet,inbook,incollection,inproceedings,conference,manual,masterthesis,misc,phdthesis,proceedings,techreport,unpublished"
+	include = bibtex.DefaultInclude
 	exclude = ""
 )
 

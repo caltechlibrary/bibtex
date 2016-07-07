@@ -31,7 +31,10 @@ import (
 
 const (
 	// Version of BibTeX package
-	Version = "v0.0.3"
+	Version = "v0.0.4"
+
+	// DefaultInclude list
+	DefaultInclude = "comment,string,article,book,booklet,inbook,incollection,inproceedings,conference,manual,masterthesis,misc,phdthesis,proceedings,techreport,unpublished"
 
 	// A template for printing an element
 	ElementTmplSrc = `
