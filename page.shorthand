@@ -11,6 +11,7 @@
 <h1>Caltech Library</h1>
 </header>
 <nav>
+{{navContent}}
 </nav>
 
 <section>

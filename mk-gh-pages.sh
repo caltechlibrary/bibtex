@@ -1,10 +1,18 @@
 #!/bin/bash
+
+function mkPage () {
+    nav="$1"
+    content="$2"
+    html="$3"
+
+    echo "Rendering $html from $content and $nav"
+    shorthand \
+        -e "{{navContent}} :[<: $nav" \
+        -e "{{pageContent}} :[<: $content" \
+        page.shorthand > $html
+}
 echo "Generating website with shorthand"
-echo "Rendering index.html"
-shorthand -e "{{pageContent}} :[<: index.md" page.shorthand > index.html
-echo "Rendering installation.html"
-shorthand -e "{{pageContent}} :[<: INSTALL.md" page.shorthand > installation.html
-echo "Rendering readme.html"
-shorthand -e "{{pageContent}} :[<: README.md" page.shorthand > readme.html
-echo "Rendering license.html"
-shorthand -e "{{pageContent}} :[<: LICENSE" page.shorthand > license.html
+mkPage nav.md index.md index.html
+mkPage nav.md README.md readme.html
+mkPage nav.md INSTALL.md installation.html
+mkPage nav.md LICENSE license.html
