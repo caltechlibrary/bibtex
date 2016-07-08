@@ -25,3 +25,7 @@ _testmain.go
 
 # Project specific ignores
 *.swp
+*~
+bin/*
+dist/*
+
