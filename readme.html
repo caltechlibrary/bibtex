@@ -1,0 +1,128 @@
+<!DOCTYPE>
+<html>
+<head>
+    <title>Caltech Library's Digital Library Development Sandbox</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<header>
+<a href="/"><img src="./assets/orangebooks-logo.png" alt="Caltech Library logo"></a>
+<h1>Caltech Library</h1>
+</header>
+<nav>
+<ul>
+<li><a href="/">Home</a></li>
+<li><a href="https://github.com/caltechlibrary/bibtex">Source Code</a></li>
+<li><a href="readme.html">README</a></li>
+<li><a href="installation.html">INSTALL</a></li>
+<li><a href="license.html">LICENSE</a></li>
+</ul>
+
+</nav>
+
+<section>
+<h1>bibtex</h1>
+
+<p>A Golang BibTeX package and <em>bibfilter</em> tool. <em>bibfilter</em> can parse and filter BibTeX entries.</p>
+
+<h2>bibfilter</h2>
+
+<p>Output <em>my.bib</em> file without comment entries</p>
+
+<pre><code>  bibfilter -exclude=comment my.bib
+</code></pre>
+
+<p>Output only articles from <em>my.bib</em></p>
+
+<pre><code>    bibfilter -include=article my.bib
+</code></pre>
+
+<p>Output only articles and conference proceedings from <em>my.bib</em></p>
+
+<pre><code>    bibfilter -include=article,inproceedings my.bib
+</code></pre>
+
+<h2>Prior art</h2>
+
+<ul>
+<li><a href="http://www.snowelm.com/~t/doc/tips/makebib.perl">makebib.perl</a> - Converts plain text through a series regexp rules into BibTeX
+
+<ul>
+<li>Perl script includes self test that maybe helpful</li>
+</ul></li>
+<li><a href="https://bitbucket.org/pybtex-devs/pybtex/src/1819074df33a?at=master">pybtex</a> - Python BibTeX processor</li>
+<li><a href="https://github.com/njwilson23/peer2">peer2</a> - Golang port of a Python tool called peer, it can do basic BibTeX format parsing</li>
+<li><a href="https://talks.golang.org/2011/lex/r59-lex.go">r59-lex.go</a> - Golang, simple lexer example using goroutines
+
+<ul>
+<li><a href="https://github.com/meling/biblexer">meling/biblexer</a> - a Golang BibTeX lexer based on Rob Pike&rsquo;s r59-lex.go</li>
+</ul></li>
+<li><a href="https://github.com/nickng/bibtex">nickng/bibtex</a> - Golang, BibTeX parser package</li>
+<li><a href="https://github.com/tmc/bibtex">tmc/bibtex</a> - Golang, BibTeX parser package</li>
+<li><a href="https://github.com/sotetsuk/gobibtex">sotetsuk/gobibtext</a> - Golang, a BibTeX parser implementing the Decode, Encode function approach</li>
+</ul>
+
+<h2>Use case input examples</h2>
+
+<ul>
+<li>Example web pages with publication list
+
+<ul>
+<li><a href="http://minerals.gps.caltech.edu/mineralogy/Publications/CV_spectra.html">Publications dealing with optical spectroscopy of minerals</a></li>
+</ul></li>
+</ul>
+
+<h2>About BibTeX</h2>
+
+<ul>
+<li><a href="https://en.m.wikipedia.org/wiki/BibTeX">Wikipedia page on BibTeX</a>
+
+<ul>
+<li>includes good description of currently used fields</li>
+</ul></li>
+<li><a href="https://getpocket.com/a/read/98701243">Bibliographies with BibTeX</a>
+
+<ul>
+<li>article explaining practical usage</li>
+</ul></li>
+<li><a href="http://www.bibtex.org/">bibtex.org</a>
+
+<ul>
+<li><a href="http://www.bibtex.org/Format/">format</a></li>
+<li><a href="http://www.bibtex.org/Using/">usage</a></li>
+</ul></li>
+</ul>
+
+<h2>Open Source Citation Tools</h2>
+
+<ul>
+<li><a href="http://www.jabref.org/">JabRef</a> - an open source bibliography reference manager.
+
+<ul>
+<li>The native file format used by JabRef is BibTeX, the standard LaTeX bibliography format.</li>
+</ul></li>
+<li><a href="https://www.zotero.org/">Zotero</a>
+
+<ul>
+<li>Provides a hosted solution</li>
+<li><a href="https://www.zotero.org/support/licensing">License</a></li>
+<li><a href="https://www.zotero.org/support/dev/source_code">Source Code</a>
+
+<ul>
+<li><a href="https://www.zotero.org/support/dev/client_coding">Developer docs</a></li>
+</ul></li>
+</ul></li>
+</ul>
+
+</section>
+
+<footer>
+<span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
+<span>&copy; 2015 <a href="http://library.caltech.edu/CLS_Copyright.htm">Caltech library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address> 
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+</footer>
+</body>
+</html>
