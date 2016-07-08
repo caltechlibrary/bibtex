@@ -1,3 +1,4 @@
+{{nav}} :import-markdown: nav.md
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,15 +11,7 @@
     <h1>Caltech Library</h1>
     </header>
     <nav>
-    <ul>
-<li><a href="/">Home</a></li>
-<li><a href="../">bibtex</a></li>
-<li><a href="https://github.com/caltechlibrary/bibtex">Source Code</a></li>
-<li><a href="../readme.html">README</a></li>
-<li><a href="../installation.html">INSTALL</a></li>
-<li><a href="../license.html">LICENSE</a></li>
-</ul>
-
+    {{nav}}
     </nav>
 
     <section>

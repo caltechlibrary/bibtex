@@ -11,5 +11,5 @@ the same *bibtex* golang package for implementation.
 + [installation](installation.html) - installation instruction for *bibfilter* command line utility
 + [README](readme.html) - about *bibtex* software project
 + [License](license.html) - *bibtex* license information
-+ [webapp](webapp/)
++ [bibfilter](webapp/) - web application
 
