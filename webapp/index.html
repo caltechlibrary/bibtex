@@ -1,58 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>A Web Application implementation of a BibTeX filter</title>
+    <title>Filter BibTeX entries by type</title>
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
     <header>
-    <h1>Filter BibTeX documents by tag type</h1>
+    <a href="/"><img src="/assets/orangebooks-logo.png" alt="Caltech Library logo"></a>
+    <h1>Caltech Library</h1>
     </header>
+    <nav>
+        <ul>
+            <li><a href="http://caltechlibrary.github.io/bibtex">About bibfilter</a></li>
+        </ul>
+    </nav>
+
     <section>
-        <div><label>Paste your BibTeX file</label><br /><textarea id="input-bibtex" cols="80", rows="50">
-@comment {
-    id0,
-    "This is some sort of comment",
-    "Yet another comment line"
-}
-
-@string{
-    markdoiel = "Mark Doiel",
-    rsdoiel = "R. S. Doiel",
-}
-
-@misc{
-    id1,
-    author="Howard" # "Phiby",
-    title={Another test},
-    year="1958"
-}
-
-@article{
-    a3,
-    author = markdoiel # "and" # rsdoiel,
-    title = "Turtles in the time continum",
-    journal = "Turtles in the Applied Sciences",
-    year = 2016,
-    volume = "3",
-    id3
-}
-
-@article {
-    author="Fred Zip",
-    note="some notes, then some more notes",
-    norweignwood,
-    year={2026},
-    id4,
-}
-
+        <h2>Filter BibTeX entries by type</h2>
+        <div><label>Paste your BibTeX</label><br /><textarea id="input-bibtex" cols="80", rows="30">
         </textarea></div>
         <div><label>Include tags (comma separated)</label> <input id="include-bibtex" type="text" placeholder="If empty include all tags" size="80" /></div>
         <div><label>Exclude tags (comma separated)</label> <input id="exclude-bibtex" type="text" placeholder="If empty do not exclude any tags" size="80" /></div>
         <div><button id="filter-bibtex">Filter your BibTeX</button></div>
-        <div><label>Results</label><br /><textarea id="output-bibtex" readonly cols="80" rows="50"></textarea></div>
+        <div><label>Copy the results</label><br /><textarea id="output-bibtex" readonly cols="80" rows="30"></textarea></div>
+        <div><label>Example <a href="https://github.com/caltechlibrary/bibtex">command line usage</a></label> <input id="cmd-example-bibtex" type="text" readonly value="" size="80" /></div>
     </section>
     <footer>
-    Proof of concept of using BibTeX Go package to build a single page webapp using GopherJS<br />
+    <span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
+    <span>&copy; 2015 <a href="http://library.caltech.edu/CLS_Copyright.htm">Caltech library</a></span>
+    <address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address> 
+    <span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+    <span><a href="mailto:library@caltech.edu">Email Us</a></span>
     </footer>
     <script src="webapp.js"></script>
     <script src="index.js"></script>
