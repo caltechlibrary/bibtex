@@ -10,5 +10,5 @@ env GOOS=darwin	GOARCH=amd64 go build -o dist/macosx-amd64/$PROGNAME cmds/$PROGN
 env GOOS=linux GOARCH=arm GOARM=6 go build -o dist/raspberrypi-arm6/$PROGNAME cmds/$PROGNAME/$PROGNAME.go
 env GOOS=linux GOARCH=arm GOARM=7 go build -o dist/raspberrypi-arm7/$PROGNAME cmds/$PROGNAME/$PROGNAME.go
 
-zip -r bibtex-binary-release.zip README.md INSTALL.md LICENSE dist/*
+zip -r $PROGNAME-binary-release.zip README.md INSTALL.md LICENSE dist/*
 
