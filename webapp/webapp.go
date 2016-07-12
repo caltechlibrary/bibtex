@@ -1,5 +1,5 @@
 //
-// webapp.go a Web Application of bibfilter
+// webapp.go a Web Application of bibtex package
 //
 // @author R. S. Doiel, <rsdoiel@caltech.edu>
 //
@@ -19,12 +19,111 @@
 package main
 
 import (
-	"github.com/caltechlibrary/bibtex/webapp/bibfilter"
+	"strings"
+
+	// Caltech Library packages
+	"github.com/caltechlibrary/bibtex"
+
 	"github.com/gopherjs/gopherjs/js"
 )
 
+// This is where we hang our BibTeX object
+type BibTeX struct {
+}
+
+func (b *BibTeX) Parse(buf, include, exclude string) string {
+	var out []string
+	elements, err := bibtex.Parse([]byte(buf))
+	if err != nil {
+		println(err)
+	}
+	if include == "" {
+		include = bibtex.DefaultInclude
+	}
+	for _, element := range elements {
+		if strings.Contains(include, element.Type) {
+			if len(exclude) == 0 || strings.Contains(exclude, element.Type) == false {
+				out = append(out, element.String())
+			}
+		}
+	}
+	return strings.Join(out, "\n")
+}
+
+func (b *BibTeX) Join(srcA, srcB string) string {
+	var out []string
+	listA, err := bibtex.Parse([]byte(srcA))
+	if err != nil {
+		println(err)
+	}
+	listB, err := bibtex.Parse([]byte(srcB))
+	if err != nil {
+		println(err)
+	}
+	listC := bibtex.Join(listA, listB)
+	for _, element := range listC {
+		out = append(out, element.String())
+	}
+	return strings.Join(out, "\n")
+}
+
+func (b *BibTeX) Diff(srcA, srcB string) string {
+	var out []string
+	listA, err := bibtex.Parse([]byte(srcA))
+	if err != nil {
+		println(err)
+	}
+	listB, err := bibtex.Parse([]byte(srcB))
+	if err != nil {
+		println(err)
+	}
+	listC := bibtex.Diff(listA, listB)
+	for _, element := range listC {
+		out = append(out, element.String())
+	}
+	return strings.Join(out, "\n")
+}
+
+func (b *BibTeX) Intersect(srcA, srcB string) string {
+	var out []string
+	listA, err := bibtex.Parse([]byte(srcA))
+	if err != nil {
+		println(err)
+	}
+	listB, err := bibtex.Parse([]byte(srcB))
+	if err != nil {
+		println(err)
+	}
+	listC := bibtex.Intersect(listA, listB)
+	for _, element := range listC {
+		out = append(out, element.String())
+	}
+	return strings.Join(out, "\n")
+}
+
+func (b *BibTeX) Exclusive(srcA, srcB string) string {
+	var out []string
+	listA, err := bibtex.Parse([]byte(srcA))
+	if err != nil {
+		println(err)
+	}
+	listB, err := bibtex.Parse([]byte(srcB))
+	if err != nil {
+		println(err)
+	}
+	listC := bibtex.Exclusive(listA, listB)
+	for _, element := range listC {
+		out = append(out, element.String())
+	}
+	return strings.Join(out, "\n")
+}
+
+func New() *js.Object {
+	return js.MakeWrapper(&BibTeX{})
+}
+
 func main() {
-	js.Global.Set("bibfilter", map[string]interface{}{
-		"New": bibfilter.New,
+	js.Global.Set("bibtex", map[string]interface{}{
+		"New": New,
 	})
 }

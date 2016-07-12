@@ -26,7 +26,7 @@
 <section>
 <h1>bibtex</h1>
 
-<p>A Golang BibTeX package and <em>bibfilter</em> tool. <em>bibfilter</em> can parse and filter BibTeX entries.</p>
+<p>A Golang BibTeX package and collection of related command line utilities.</p>
 
 <h2>bibfilter</h2>
 
@@ -43,6 +43,25 @@
 <p>Output only articles and conference proceedings from <em>my.bib</em></p>
 
 <pre><code>    bibfilter -include=article,inproceedings my.bib
+</code></pre>
+
+<h2>bibmerge</h2>
+
+<p>Output a new bibtex file based on the contents of two other bibtex files.</p>
+
+<p>Union of two bibtex files</p>
+
+<pre><code>    bibmerge -union mybib1.bib mybib2.bib
+</code></pre>
+
+<p>Intersection of two bibtex</p>
+
+<pre><code>    bibmerge -intersect mybib1.bib mybib2.bib
+</code></pre>
+
+<p>Difference of two bibtex</p>
+
+<pre><code>    bibmerge -diff mybib1.bib mybib2.bib
 </code></pre>
 
 </section>

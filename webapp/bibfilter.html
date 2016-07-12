@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BibTeX Tools</title>
+    <title>Filter BibTeX entries by type</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -23,11 +23,13 @@
     </nav>
 
     <section>
-        <h2>BibTeX tools</h2>
-        <ul>
-            <li><a href="./bibfilter.html">bibfilter</a> - filter bibtex files by entry type</li>
-            <li><a href="./bibmerge.html">bibmerge</a> - merge as union, intersection or difference two bibtex files</li>
-        </ul>
+        <h2>Filter BibTeX entries by type</h2>
+        <div><label>Paste your BibTeX</label><br /><textarea id="input-bibtex" cols="80", rows="30"></textarea></div>
+        <div><label>Include tags (comma separated)</label> <input id="include-bibtex" type="text" placeholder="If empty include all tags" size="80" /></div>
+        <div><label>Exclude tags (comma separated)</label> <input id="exclude-bibtex" type="text" placeholder="If empty do not exclude any tags" size="80" /></div>
+        <div><button id="filter-bibtex">Filter your BibTeX</button></div>
+        <div><label>Copy the results</label><br /><textarea id="output-bibtex" readonly cols="80" rows="30"></textarea></div>
+        <div><label>Example <a href="https://github.com/caltechlibrary/bibtex">command line usage</a></label> <input id="cmd-example-bibtex" type="text" readonly value="" size="80" /></div>
     </section>
     <footer>
     <span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
@@ -36,5 +38,7 @@
     <span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
     <span><a href="mailto:library@caltech.edu">Email Us</a></span>
     </footer>
+    <script src="webapp.js"></script>
+    <script src="bibfilter.js"></script>
 </body>
 </html>

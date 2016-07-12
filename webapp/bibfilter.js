@@ -1,5 +1,5 @@
 /*
- * index.js binds the form elements to access the bibfilter implemented with GopherJS
+ * bibfilter.js binds the form elements to access the bibtex object implemented with GopherJS
  */
 (function (window, document) {
     'use strict';
@@ -11,7 +11,7 @@
         cmdExample = document.getElementById("cmd-example-bibtex");
         
     submitButton.addEventListener("click", function (evt) {
-        var filter = bibfilter.New(),
+        var filter = bibtex.New(),
             cmd = [];
         outputTextArea.value = filter.Parse(inputTextArea.value, includeInput.value, excludeInput.value);
         if (cmdExample) {
@@ -26,5 +26,4 @@
             cmdExample.value = cmd.join(" ")
         }
     });
-    console.log(submitButton);
 }(window, document));
