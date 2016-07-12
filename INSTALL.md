@@ -58,7 +58,7 @@ package. You will need the GOBIN environment variable set. In this example I've 
 
 or
 
-``
+```
     git clone https://github.com/caltechlibrary/bibtex src/github.com/caltechlibrary/bibtex
     cd src/github.com/caltechlibrary/bibtex
     make
