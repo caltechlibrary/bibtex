@@ -40,8 +40,8 @@ your computer type and operating system can be copied to a bin directory in your
 <ol>
 <li>Download <strong>bibtex-binary-release.zip</strong> from <a href="https://github.com/caltechlibrary/bibtex/releases/latest">https://github.com/caltechlibrary/bibtex/releases/latest</a></li>
 <li>Open a finder window, find and unzip <strong>bibtex-binary-release.zip</strong></li>
-<li>Look in the unziped folder and find <em>dist/maxosx-amd64/bibfilter</em></li>
-<li>Drag (or copy) the <em>bibfilter</em> to a &ldquo;bin&rdquo; directory in your path</li>
+<li>Look in the unziped folder and find <em>dist/macosx-amd64/bibfilter</em> and <em>dist/macosx-amd64/bibmerge</em></li>
+<li>Drag (or copy) both <em>bibfilter</em> and <em>bibmerge</em> to a &ldquo;bin&rdquo; directory in your path</li>
 <li>Open and &ldquo;Terminal&rdquo; and run <code>bibfilter -h</code> to confirm you were successful</li>
 </ol>
 
@@ -50,8 +50,8 @@ your computer type and operating system can be copied to a bin directory in your
 <ol>
 <li>Download <strong>bibtex-binary-release.zip</strong> from <a href="https://github.com/caltechlibrary/bibtex/releases/latest">https://github.com/caltechlibrary/bibtex/releases/latest</a></li>
 <li>Open the file manager find and unzip <strong>bibtex-binary-release.zip</strong></li>
-<li>Look in the unziped folder and find <em>dist/windows-amd64/bibfilter.exe</em></li>
-<li>Drag (or copy) the <em>bibfilter.exe</em> to a &ldquo;bin&rdquo; directory in your path</li>
+<li>Look in the unziped folder and find <em>dist/windows-amd64/bibfilter.exe</em> and <em>dist/windows-amd64/bibmerge.exe</em></li>
+<li>Drag (or copy) both <em>bibfilter.exe</em> and <em>bibmerge.exe</em> to a &ldquo;bin&rdquo; directory in your path</li>
 <li>Open Bash and and run <code>bibfilter -h</code> to confirm you were successful</li>
 </ol>
 
@@ -61,7 +61,7 @@ your computer type and operating system can be copied to a bin directory in your
 <li>Download <strong>bibtex-binary-release.zip</strong> from <a href="https://github.com/caltechlibrary/bibtex/releases/latest">https://github.com/caltechlibrary/bibtex/releases/latest</a></li>
 <li>Find and unzip <strong>bibtex-binary-release.zip</strong></li>
 <li>In the unziped directory and find for <em>dist/linux-amd64/bibfilter</em></li>
-<li>Copy the <em>bibfilter</em> to a &ldquo;bin&rdquo; directory (e.g. cp ~/Downloads/bibtex-master/dist/linux-amd64/bibfilter ~/bin/)</li>
+<li>Copy both <em>bibfilter</em> <em>bibmerge</em> to a &ldquo;bin&rdquo; directory (e.g. cp ~/Downloads/bibtex-binary-release/dist/linux-amd64/bibfilter ~/bin/)</li>
 <li>From the shell prompt run <code>bibfilter -h</code> to confirm you were successful</li>
 </ol>
 
@@ -73,7 +73,7 @@ your computer type and operating system can be copied to a bin directory in your
 <li>Download <strong>bibtex-binary-release.zip</strong> from <a href="https://github.com/caltechlibrary/bibtex/releases/latest">https://github.com/caltechlibrary/bibtex/releases/latest</a></li>
 <li>Find and unzip <strong>bibtex-binary-release.zip</strong></li>
 <li>In the unziped directory and find for <em>dist/raspberrypi-arm7/bibfilter</em></li>
-<li>copy the <em>bibfilter</em> to a &ldquo;bin&rdquo; directory (e.g. cp ~/Downloads/bibtex-master/dist/raspberrypi-arm7/bibfilter ~/bin/)
+<li>Copy both <em>bibfilter</em> and <em>bibmerge</em> to a &ldquo;bin&rdquo; directory (e.g. cp ~/Downloads/bibtex-binary-release/dist/raspberrypi-arm7/bibfilter ~/bin/)
 
 <ul>
 <li>if you are using an original Raspberry Pi you should copy the ARM6 version instead</li>
@@ -89,6 +89,16 @@ package. You will need the GOBIN environment variable set. In this example I&rsq
 <pre><code>    GOBIN=$HOME/bin
     go get github.com/caltechlibrary/bibtex/...
 </code></pre>
+
+<p>or</p>
+
+<p><code>
+    git clone https://github.com/caltechlibrary/bibtex src/github.com/caltechlibrary/bibtex
+    cd src/github.com/caltechlibrary/bibtex
+    make
+    make test
+    make install
+</code>`</p>
 
 </section>
 

@@ -1,6 +1,8 @@
 #!/bin/bash
-D=$(pwd)
+CWD=$(pwd)
 cd webapp
 shorthand index.shorthand > index.html
+shorthand bibfilter.shorthand > bibfilter.html
+shorthand bibmerge.shorthand > bibmerge.html
 gopherjs build
-cd "$D"
+cd "$CWD"
