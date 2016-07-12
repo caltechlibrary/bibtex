@@ -46,9 +46,9 @@ func init() {
 	flag.BoolVar(&showLicense, "l", false, "display license")
 
 	flag.BoolVar(&mergeJoin, "join", false, "join two bib files")
-	flag.BoolVar(&mergeDiff, "diff", false, "take the difference (asymetric) between two bib files")
+	flag.BoolVar(&mergeDiff, "diff", false, "take the difference (asymmetric) between two bib files")
 	flag.BoolVar(&mergeIntersect, "intersect", false, "generate a bib listing from the intersection of two bib files")
-	flag.BoolVar(&mergeExclusive, "exclusive", false, "generate a symetric difference between two bib files")
+	flag.BoolVar(&mergeExclusive, "exclusive", false, "generate a symmetric difference between two bib files")
 }
 
 func main() {

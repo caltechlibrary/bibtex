@@ -33,7 +33,7 @@ Join of two bibtex files
     bibmerge -join mybib1.bib mybib2.bib
 ```
 
-Difference (asymetric, set A - B may not equal set B - A) of two bibtex files
+Difference (asymmetric, set A - B may not equal set B - A) of two bibtex files
 
 ```
     bibmerge -diff mybib1.bib mybib2.bib
@@ -45,7 +45,7 @@ Intersection of two bibtex files
     bibmerge -intersect mybib1.bib mybib2.bib
 ```
 
-Excluse difference (symetric difference, inverse of intersection) of two bibtex files
+Excluse difference (symmetric difference, inverse of intersection) of two bibtex files
 
 ```
     bibmerge -exclusive mybib1.bib mybib2.bib
