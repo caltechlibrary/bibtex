@@ -49,19 +49,24 @@
 
 <p>Output a new bibtex file based on the contents of two other bibtex files.</p>
 
-<p>Union of two bibtex files</p>
+<p>Join of two bibtex files</p>
 
-<pre><code>    bibmerge -union mybib1.bib mybib2.bib
+<pre><code>    bibmerge -join mybib1.bib mybib2.bib
 </code></pre>
 
-<p>Intersection of two bibtex</p>
+<p>Difference (asymetric, set A - B may not equal set B - A) of two bibtex files</p>
+
+<pre><code>    bibmerge -diff mybib1.bib mybib2.bib
+</code></pre>
+
+<p>Intersection of two bibtex files</p>
 
 <pre><code>    bibmerge -intersect mybib1.bib mybib2.bib
 </code></pre>
 
-<p>Difference of two bibtex</p>
+<p>Excluse difference (symetric difference, inverse of intersection) of two bibtex files</p>
 
-<pre><code>    bibmerge -diff mybib1.bib mybib2.bib
+<pre><code>    bibmerge -exclusive mybib1.bib mybib2.bib
 </code></pre>
 
 </section>

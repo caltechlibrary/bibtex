@@ -27,21 +27,27 @@ Output only articles and conference proceedings from _my.bib_
 
 Output a new bibtex file based on the contents of two other bibtex files.
 
-Union of two bibtex files
+Join of two bibtex files
 
 ```
-    bibmerge -union mybib1.bib mybib2.bib
+    bibmerge -join mybib1.bib mybib2.bib
 ```
 
-Intersection of two bibtex
+Difference (asymetric, set A - B may not equal set B - A) of two bibtex files
+
+```
+    bibmerge -diff mybib1.bib mybib2.bib
+```
+
+Intersection of two bibtex files
 
 ```
     bibmerge -intersect mybib1.bib mybib2.bib
 ```
 
-Difference of two bibtex
+Excluse difference (symetric difference, inverse of intersection) of two bibtex files
 
 ```
-    bibmerge -diff mybib1.bib mybib2.bib
+    bibmerge -exclusive mybib1.bib mybib2.bib
 ```
 
