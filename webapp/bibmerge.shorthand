@@ -21,9 +21,9 @@
         <div><label>Paste your BibTeX</label><br /><textarea id="inputB-bibtex" cols="80", rows="30"></textarea></div>
         <select id="merge-type-bibtex">
             <option value="join">Join</option>
-            <option value="diff">Difference (asymetric diff)</option>
+            <option value="diff">Difference (asymmetric diff)</option>
             <option value="intersect">Intersection</option>
-            <option value="exclusive">Exclusive (symetric diff)</option>
+            <option value="exclusive">Exclusive (symmetric diff)</option>
         <select>
         <div><button id="merge-bibtex">Merge</button></div>
         <div><label>Copy the results</label><br /><textarea id="output-bibtex" readonly cols="80" rows="30"></textarea></div>

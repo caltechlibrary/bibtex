@@ -240,7 +240,7 @@ func TestDiff(t *testing.T) {
 	isTrue(len(elemList3) == 1, fmt.Sprintf("len(elemList3) should be 1 - %s, %s, %s", elemList1, elemList2, elemList3), true)
 }
 
-// TestExclusive for symetrical differences of Element Lists
+// TestExclusive for symmetrical differences of Element Lists
 func TestExclusive(t *testing.T) {
 	noError := func(err error, failNow bool) bool {
 		if err != nil {
