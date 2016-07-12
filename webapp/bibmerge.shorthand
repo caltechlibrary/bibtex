@@ -27,7 +27,7 @@
         <select>
         <div><button id="merge-bibtex">Merge</button></div>
         <div><label>Copy the results</label><br /><textarea id="output-bibtex" readonly cols="80" rows="30"></textarea></div>
-        <div><label>Example <a href="https://github.com/caltechlibrary/bibtex">command line usage</a></label> <input id="cmd-example-bibtex" type="text" readonly value="" size="80" /></div>
+        <div><label>Example command line usage</label> <input id="cmd-example-bibtex" type="text" readonly value="" size="80" /></div>
     </section>
     <footer>
     <span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
