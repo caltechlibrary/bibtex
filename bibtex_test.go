@@ -200,6 +200,51 @@ func TestJoin(t *testing.T) {
 		t.Errorf("Expected bibList3 to be length of bibList2 - %s, %s", bibList2, bibList3)
 		t.FailNow()
 	}
+
+	// Test where two bib records have different formatting but same content.
+	src1 = []byte(`@article{12034,author={Robert}}`)
+	src2 = []byte(`@article{12034,author="Robert"}`)
+	bibList1, err = Parse(src1)
+	bibList2, err = Parse(src2)
+	bibList3 = Join(bibList1, bibList2)
+	if len(bibList3) != 1 {
+		t.Errorf("1. Expected a single bib record - %s, %s, %s", bibList1, bibList2, bibList3)
+	}
+
+	src1 = []byte(`@article{12034,
+author={Robert}
+}`)
+	src2 = []byte(`@article{12034,
+	author="Robert"
+}`)
+	bibList1, err = Parse(src1)
+	bibList2, err = Parse(src2)
+	bibList3 = Join(bibList1, bibList2)
+	if len(bibList3) != 1 {
+		t.Errorf("2. Expected a single bib record - %s, %s, %s", bibList1, bibList2, bibList3)
+	}
+
+	src1 = []byte(`@article{12034,author="Robert"}`)
+	src2 = []byte(`
+@article{12034,
+author="Robert"
+}
+`)
+	bibList1, err = Parse(src1)
+	bibList2, err = Parse(src2)
+	if strings.Compare(bibList1[0].Type, bibList2[0].Type) != 0 {
+		t.Errorf("Types don't match %s != %s", bibList1[0].Type, bibList2[0].Type)
+	}
+	if strings.Compare(strings.Join(bibList1[0].Keys, ""), strings.Join(bibList2[0].Keys, "")) != 0 {
+		t.Errorf("Keys don't match %s != %s", bibList1[0].Keys, bibList2[0].Keys)
+	}
+	if len(bibList1[0].Tags) != len(bibList2[0].Tags) {
+		t.Errorf("Tags don't match\nsrc1:\n%s\n|-> %+v\nsrc2:\n%s\n|-> %+v\n", src1, bibList1[0].Tags, src2, bibList2[0].Tags)
+	}
+	bibList3 = Join(bibList1, bibList2)
+	if len(bibList3) != 1 {
+		t.Errorf("3. Expected a single bib record - %s, %s, %s", bibList1, bibList2, bibList3)
+	}
 }
 
 // TestDiff test taking the difference between Element lists

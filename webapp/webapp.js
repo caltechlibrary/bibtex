@@ -24858,7 +24858,7 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 				/* */ if (ky.length > 0) { $s = 6; continue; }
 				/* */ $s = 7; continue;
 				/* if (ky.length > 0) { */ case 6:
-					_r$1 = fmt.Sprintf("    %s,", new sliceType$1([new $String(ky)])); /* */ $s = 8; case 8: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+					_r$1 = fmt.Sprintf("%s,\n", new sliceType$1([new $String(ky)])); /* */ $s = 8; case 8: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 					out = $append(out, _r$1);
 				/* } */ case 7:
 				_i++;
@@ -24879,14 +24879,14 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 				}
 				ky$1 = _entry.k;
 				val = _entry.v;
-				_r$2 = fmt.Sprintf("    %s = %s,", new sliceType$1([new $String(ky$1), new $String(val)])); /* */ $s = 13; case 13: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+				_r$2 = fmt.Sprintf("    %s = %s,\n", new sliceType$1([new $String(ky$1), new $String(val)])); /* */ $s = 13; case 13: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
 				out = $append(out, _r$2);
 				_i$1++;
 			/* } */ $s = 11; continue; case 12:
 		/* } */ case 10:
 		_r$3 = fmt.Sprintf("}", new sliceType$1([])); /* */ $s = 14; case 14: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
 		out = $append(out, _r$3);
-		return strings.Join(out, "\n");
+		return strings.Join(out, "");
 		/* */ } return; } if ($f === undefined) { $f = { $blk: Element.ptr.prototype.String }; } $f.$ptr = $ptr; $f._entry = _entry; $f._i = _i; $f._i$1 = _i$1; $f._keys = _keys; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._ref = _ref; $f._ref$1 = _ref$1; $f.element = element; $f.ky = ky; $f.ky$1 = ky$1; $f.out = out; $f.val = val; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Element.prototype.String = function() { return this.$val.String(); };
@@ -24931,8 +24931,8 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 	};
 	$pkg.Bib = Bib;
 	mkElement = function(elementType, buf) {
-		var $ptr, _key, _r, _r$1, _r$2, _tuple, _tuple$1, _tuple$2, between, buf, element, elementType, err, key, keys, tags, token, val, x, x$1, x$2, x$3, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _key = $f._key; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; between = $f.between; buf = $f.buf; element = $f.element; elementType = $f.elementType; err = $f.err; key = $f.key; keys = $f.keys; tags = $f.tags; token = $f.token; val = $f.val; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; x$3 = $f.x$3; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _key, _r, _r$1, _r$2, _r$3, _tuple, _tuple$1, _tuple$2, between, buf, element, elementType, err, key, keys, tags, token, val, x, x$1, x$2, x$3, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _key = $f._key; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; between = $f.between; buf = $f.buf; element = $f.element; elementType = $f.elementType; err = $f.err; key = $f.key; keys = $f.keys; tags = $f.tags; token = $f.token; val = $f.val; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; x$3 = $f.x$3; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		key = sliceType$2.nil;
 		val = sliceType$2.nil;
 		between = sliceType$2.nil;
@@ -24990,12 +24990,16 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 					val = sliceType$2.nil;
 					$s = 11; continue;
 				/* } else if (token.Type === "Comma" || (buf.$length === 0)) { */ case 8:
-					if (key.$length > 0) {
+					/* */ if (key.$length > 0) { $s = 14; continue; }
+					/* */ $s = 15; continue;
+					/* if (key.$length > 0) { */ case 14:
 						_key = $bytesToString(key); (tags || $throwRuntimeError("assignment to entry in nil map"))[$String.keyFor(_key)] = { k: _key, v: $bytesToString(val) };
 						key = sliceType$2.nil;
-					} else {
-						keys = $append(keys, $bytesToString(val));
-					}
+						$s = 16; continue;
+					/* } else { */ case 15:
+						_r$3 = strings.TrimSpace($bytesToString(val)); /* */ $s = 17; case 17: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+						keys = $append(keys, _r$3);
+					/* } */ case 16:
 					val = sliceType$2.nil;
 					$s = 11; continue;
 				/* } else if (token.Type === "Punctuation" && bytes.Equal(token.Value, new sliceType$2($stringToBytes("#")))) { */ case 9:
@@ -25009,7 +25013,7 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 		element.Keys = keys;
 		element.Tags = tags;
 		return [element, $ifaceNil];
-		/* */ } return; } if ($f === undefined) { $f = { $blk: mkElement }; } $f.$ptr = $ptr; $f._key = _key; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.between = between; $f.buf = buf; $f.element = element; $f.elementType = elementType; $f.err = err; $f.key = key; $f.keys = keys; $f.tags = tags; $f.token = token; $f.val = val; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.x$3 = x$3; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: mkElement }; } $f.$ptr = $ptr; $f._key = _key; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.between = between; $f.buf = buf; $f.element = element; $f.elementType = elementType; $f.err = err; $f.key = key; $f.keys = keys; $f.tags = tags; $f.token = token; $f.val = val; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.x$3 = x$3; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Parse = function(buf) {
 		var $ptr, LF, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, _tuple, _tuple$1, _tuple$2, _tuple$3, _tuple$4, buf, element, elementType, elements, entrySource, err, err$1, lineNo, skipped, token, $s, $r;
