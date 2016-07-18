@@ -132,11 +132,17 @@ func (element *Element) String() string {
 
 	out = append(out, fmt.Sprintf("@%s{", element.Type))
 	if len(element.Keys) > 0 {
-		for _, ky := range element.Keys {
+		for i, ky := range element.Keys {
 			if len(ky) > 0 {
-				out = append(out, fmt.Sprintf("%s,\n", ky))
+				if i == 0 {
+					out = append(out, fmt.Sprintf("%s,\n", ky))
+				} else {
+					out = append(out, fmt.Sprintf("    %s,\n", ky))
+				}
 			}
 		}
+	} else {
+		out = append(out, "\n")
 	}
 
 	if len(element.Tags) > 0 {
@@ -251,7 +257,7 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			if len(key) > 0 {
 				//make a map entry
 				tags[string(key)] = string(val)
-			} else {
+			} else if len(val) > 0 {
 				// append to element keys
 				keys = append(keys, string(val))
 			}
@@ -263,8 +269,12 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			val = append(val[:], token.Value[:]...)
 		}
 	}
-	element.Keys = keys
-	element.Tags = tags
+	if len(keys) > 0 {
+		element.Keys = keys
+	}
+	if len(tags) > 0 {
+		element.Tags = tags
+	}
 	return element, nil
 }
 
