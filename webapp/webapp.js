@@ -24811,7 +24811,7 @@ $packages["sort"] = (function() {
 	return $pkg;
 })();
 $packages["github.com/caltechlibrary/bibtex"] = (function() {
-	var $pkg = {}, $init, bytes, xml, fmt, tok, sort, strings, Element, ByKey, sliceType, sliceType$1, sliceType$2, ptrType$2, ptrType$3, sliceType$3, mapType$1, Bib, mkElement, Parse, Equal, Contains, Join, Diff, Intersect, Exclusive;
+	var $pkg = {}, $init, bytes, xml, fmt, tok, sort, strings, Element, ByKey, sliceType, sliceType$1, sliceType$2, ptrType$2, ptrType$3, sliceType$3, mapType$1, Bib, mkElement, Parse, compareTagValues, Equal, Contains, Join, Diff, Intersect, Exclusive;
 	bytes = $packages["bytes"];
 	xml = $packages["encoding/xml"];
 	fmt = $packages["fmt"];
@@ -24841,8 +24841,8 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 	sliceType$3 = $sliceType(ptrType$3);
 	mapType$1 = $mapType($String, $String);
 	Element.ptr.prototype.String = function() {
-		var $ptr, _entry, _i, _i$1, _keys, _r, _r$1, _r$2, _r$3, _ref, _ref$1, element, ky, ky$1, out, val, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _i = $f._i; _i$1 = $f._i$1; _keys = $f._keys; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _ref = $f._ref; _ref$1 = $f._ref$1; element = $f.element; ky = $f.ky; ky$1 = $f.ky$1; out = $f.out; val = $f.val; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _entry, _i, _i$1, _keys, _r, _r$1, _r$2, _r$3, _r$4, _ref, _ref$1, element, i, ky, ky$1, out, val, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _i = $f._i; _i$1 = $f._i$1; _keys = $f._keys; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _ref = $f._ref; _ref$1 = $f._ref$1; element = $f.element; i = $f.i; ky = $f.ky; ky$1 = $f.ky$1; out = $f.out; val = $f.val; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		element = this;
 		out = sliceType.nil;
 		_r = fmt.Sprintf("@%s{", new sliceType$1([new $String(element.Type)])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
@@ -24852,42 +24852,54 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 		/* if (element.Keys.$length > 0) { */ case 2:
 			_ref = element.Keys;
 			_i = 0;
-			/* while (true) { */ case 4:
-				/* if (!(_i < _ref.$length)) { break; } */ if(!(_i < _ref.$length)) { $s = 5; continue; }
+			/* while (true) { */ case 5:
+				/* if (!(_i < _ref.$length)) { break; } */ if(!(_i < _ref.$length)) { $s = 6; continue; }
+				i = _i;
 				ky = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
-				/* */ if (ky.length > 0) { $s = 6; continue; }
-				/* */ $s = 7; continue;
-				/* if (ky.length > 0) { */ case 6:
-					_r$1 = fmt.Sprintf("    %s,", new sliceType$1([new $String(ky)])); /* */ $s = 8; case 8: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
-					out = $append(out, _r$1);
-				/* } */ case 7:
+				/* */ if (ky.length > 0) { $s = 7; continue; }
+				/* */ $s = 8; continue;
+				/* if (ky.length > 0) { */ case 7:
+					/* */ if (i === 0) { $s = 9; continue; }
+					/* */ $s = 10; continue;
+					/* if (i === 0) { */ case 9:
+						_r$1 = fmt.Sprintf("%s,\n", new sliceType$1([new $String(ky)])); /* */ $s = 12; case 12: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+						out = $append(out, _r$1);
+						$s = 11; continue;
+					/* } else { */ case 10:
+						_r$2 = fmt.Sprintf("    %s,\n", new sliceType$1([new $String(ky)])); /* */ $s = 13; case 13: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+						out = $append(out, _r$2);
+					/* } */ case 11:
+				/* } */ case 8:
 				_i++;
-			/* } */ $s = 4; continue; case 5:
-		/* } */ case 3:
-		/* */ if ($keys(element.Tags).length > 0) { $s = 9; continue; }
-		/* */ $s = 10; continue;
-		/* if ($keys(element.Tags).length > 0) { */ case 9:
+			/* } */ $s = 5; continue; case 6:
+			$s = 4; continue;
+		/* } else { */ case 3:
+			out = $append(out, "\n");
+		/* } */ case 4:
+		/* */ if ($keys(element.Tags).length > 0) { $s = 14; continue; }
+		/* */ $s = 15; continue;
+		/* if ($keys(element.Tags).length > 0) { */ case 14:
 			_ref$1 = element.Tags;
 			_i$1 = 0;
 			_keys = $keys(_ref$1);
-			/* while (true) { */ case 11:
-				/* if (!(_i$1 < _keys.length)) { break; } */ if(!(_i$1 < _keys.length)) { $s = 12; continue; }
+			/* while (true) { */ case 16:
+				/* if (!(_i$1 < _keys.length)) { break; } */ if(!(_i$1 < _keys.length)) { $s = 17; continue; }
 				_entry = _ref$1[_keys[_i$1]];
 				if (_entry === undefined) {
 					_i$1++;
-					/* continue; */ $s = 11; continue;
+					/* continue; */ $s = 16; continue;
 				}
 				ky$1 = _entry.k;
 				val = _entry.v;
-				_r$2 = fmt.Sprintf("    %s = %s,", new sliceType$1([new $String(ky$1), new $String(val)])); /* */ $s = 13; case 13: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
-				out = $append(out, _r$2);
+				_r$3 = fmt.Sprintf("    %s = %s,\n", new sliceType$1([new $String(ky$1), new $String(val)])); /* */ $s = 18; case 18: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+				out = $append(out, _r$3);
 				_i$1++;
-			/* } */ $s = 11; continue; case 12:
-		/* } */ case 10:
-		_r$3 = fmt.Sprintf("}", new sliceType$1([])); /* */ $s = 14; case 14: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
-		out = $append(out, _r$3);
-		return strings.Join(out, "\n");
-		/* */ } return; } if ($f === undefined) { $f = { $blk: Element.ptr.prototype.String }; } $f.$ptr = $ptr; $f._entry = _entry; $f._i = _i; $f._i$1 = _i$1; $f._keys = _keys; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._ref = _ref; $f._ref$1 = _ref$1; $f.element = element; $f.ky = ky; $f.ky$1 = ky$1; $f.out = out; $f.val = val; $f.$s = $s; $f.$r = $r; return $f;
+			/* } */ $s = 16; continue; case 17:
+		/* } */ case 15:
+		_r$4 = fmt.Sprintf("}\n", new sliceType$1([])); /* */ $s = 19; case 19: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+		out = $append(out, _r$4);
+		return strings.Join(out, "");
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Element.ptr.prototype.String }; } $f.$ptr = $ptr; $f._entry = _entry; $f._i = _i; $f._i$1 = _i$1; $f._keys = _keys; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._ref = _ref; $f._ref$1 = _ref$1; $f.element = element; $f.i = i; $f.ky = ky; $f.ky$1 = ky$1; $f.out = out; $f.val = val; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Element.prototype.String = function() { return this.$val.String(); };
 	Bib = function(token, buf) {
@@ -24931,8 +24943,8 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 	};
 	$pkg.Bib = Bib;
 	mkElement = function(elementType, buf) {
-		var $ptr, _key, _r, _r$1, _r$2, _tuple, _tuple$1, _tuple$2, between, buf, element, elementType, err, key, keys, tags, token, val, x, x$1, x$2, x$3, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _key = $f._key; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; between = $f.between; buf = $f.buf; element = $f.element; elementType = $f.elementType; err = $f.err; key = $f.key; keys = $f.keys; tags = $f.tags; token = $f.token; val = $f.val; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; x$3 = $f.x$3; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _key, _key$1, _r, _r$1, _r$2, _tuple, _tuple$1, _tuple$2, between, buf, element, elementType, err, key, keys, tags, token, val, x, x$1, x$2, x$3, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _key = $f._key; _key$1 = $f._key$1; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; _tuple$2 = $f._tuple$2; between = $f.between; buf = $f.buf; element = $f.element; elementType = $f.elementType; err = $f.err; key = $f.key; keys = $f.keys; tags = $f.tags; token = $f.token; val = $f.val; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; x$3 = $f.x$3; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		key = sliceType$2.nil;
 		val = sliceType$2.nil;
 		between = sliceType$2.nil;
@@ -24945,6 +24957,11 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 		tags = {};
 		/* while (true) { */ case 1:
 			if (buf.$length === 0) {
+				if (key.$length > 0) {
+					_key = $bytesToString(key); (tags || $throwRuntimeError("assignment to entry in nil map"))[$String.keyFor(_key)] = { k: _key, v: $bytesToString(val) };
+				} else if (val.$length > 0) {
+					keys = $append(keys, $bytesToString(val));
+				}
 				/* break; */ $s = 2; continue;
 			}
 			_r = tok.Skip2("Space", buf, Bib); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
@@ -24991,11 +25008,11 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 					$s = 11; continue;
 				/* } else if (token.Type === "Comma" || (buf.$length === 0)) { */ case 8:
 					if (key.$length > 0) {
-						_key = $bytesToString(key); (tags || $throwRuntimeError("assignment to entry in nil map"))[$String.keyFor(_key)] = { k: _key, v: $bytesToString(val) };
-						key = sliceType$2.nil;
-					} else {
+						_key$1 = $bytesToString(key); (tags || $throwRuntimeError("assignment to entry in nil map"))[$String.keyFor(_key$1)] = { k: _key$1, v: $bytesToString(val) };
+					} else if (val.$length > 0) {
 						keys = $append(keys, $bytesToString(val));
 					}
+					key = sliceType$2.nil;
 					val = sliceType$2.nil;
 					$s = 11; continue;
 				/* } else if (token.Type === "Punctuation" && bytes.Equal(token.Value, new sliceType$2($stringToBytes("#")))) { */ case 9:
@@ -25006,10 +25023,14 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 				/* } */ case 11:
 			case 4:
 		/* } */ $s = 1; continue; case 2:
-		element.Keys = keys;
-		element.Tags = tags;
+		if (keys.$length > 0) {
+			element.Keys = keys;
+		}
+		if ($keys(tags).length > 0) {
+			element.Tags = tags;
+		}
 		return [element, $ifaceNil];
-		/* */ } return; } if ($f === undefined) { $f = { $blk: mkElement }; } $f.$ptr = $ptr; $f._key = _key; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.between = between; $f.buf = buf; $f.element = element; $f.elementType = elementType; $f.err = err; $f.key = key; $f.keys = keys; $f.tags = tags; $f.token = token; $f.val = val; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.x$3 = x$3; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: mkElement }; } $f.$ptr = $ptr; $f._key = _key; $f._key$1 = _key$1; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f.between = between; $f.buf = buf; $f.element = element; $f.elementType = elementType; $f.err = err; $f.key = key; $f.keys = keys; $f.tags = tags; $f.token = token; $f.val = val; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.x$3 = x$3; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Parse = function(buf) {
 		var $ptr, LF, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, _tuple, _tuple$1, _tuple$2, _tuple$3, _tuple$4, buf, element, elementType, elements, entrySource, err, err$1, lineNo, skipped, token, $s, $r;
@@ -25113,6 +25134,20 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 		return strings.Compare(((i < 0 || i >= a.$length) ? $throwRuntimeError("index out of range") : a.$array[a.$offset + i]), ((j < 0 || j >= a.$length) ? $throwRuntimeError("index out of range") : a.$array[a.$offset + j])) < 0;
 	};
 	$ptrType(ByKey).prototype.Less = function(i, j) { return this.$get().Less(i, j); };
+	compareTagValues = function(val1, val2) {
+		var $ptr, i1, i2, val1, val2;
+		if (strings.Compare(val1, val2) === 0) {
+			return true;
+		}
+		if (val1.length > 2 && val2.length > 2) {
+			i1 = val1.length - 1 >> 0;
+			i2 = val2.length - 1 >> 0;
+			if (strings.Compare(val1.substring(1, i1), val2.substring(1, i2)) === 0) {
+				return true;
+			}
+		}
+		return false;
+	};
 	Equal = function(elem1, elem2) {
 		var $ptr, _entry, _entry$1, _i, _i$1, _keys, _ref, _ref$1, _tuple, elem1, elem2, i, keys1, keys2, ky, ky$1, ok, val1, val2, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _entry$1 = $f._entry$1; _i = $f._i; _i$1 = $f._i$1; _keys = $f._keys; _ref = $f._ref; _ref$1 = $f._ref$1; _tuple = $f._tuple; elem1 = $f.elem1; elem2 = $f.elem2; i = $f.i; keys1 = $f.keys1; keys2 = $f.keys2; ky = $f.ky; ky$1 = $f.ky$1; ok = $f.ok; val1 = $f.val1; val2 = $f.val2; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -25154,7 +25189,7 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 			ok = _tuple[1];
 			if (!(ok)) {
 				return false;
-			} else if (!((strings.Compare(val1, val2) === 0))) {
+			} else if (compareTagValues(val1, val2) === false) {
 				return false;
 			}
 			_i$1++;

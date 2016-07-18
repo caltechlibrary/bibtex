@@ -132,21 +132,27 @@ func (element *Element) String() string {
 
 	out = append(out, fmt.Sprintf("@%s{", element.Type))
 	if len(element.Keys) > 0 {
-		for _, ky := range element.Keys {
+		for i, ky := range element.Keys {
 			if len(ky) > 0 {
-				out = append(out, fmt.Sprintf("    %s,", ky))
+				if i == 0 {
+					out = append(out, fmt.Sprintf("%s,\n", ky))
+				} else {
+					out = append(out, fmt.Sprintf("    %s,\n", ky))
+				}
 			}
 		}
+	} else {
+		out = append(out, "\n")
 	}
 
 	if len(element.Tags) > 0 {
 		for ky, val := range element.Tags {
-			out = append(out, fmt.Sprintf("    %s = %s,", ky, val))
+			out = append(out, fmt.Sprintf("    %s = %s,\n", ky, val))
 		}
 	}
 
-	out = append(out, fmt.Sprintf("}"))
-	return strings.Join(out, "\n")
+	out = append(out, fmt.Sprintf("}\n"))
+	return strings.Join(out, "")
 }
 
 //
@@ -213,6 +219,13 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 
 	for {
 		if len(buf) == 0 {
+			if len(key) > 0 {
+				// We have a trailing key/value pair to save.
+				tags[string(key)] = string(val)
+			} else if len(val) > 0 {
+				// We have a trailing key to save.
+				keys = append(keys, string(val))
+			}
 			break
 		}
 		_, token, buf = tok.Skip2(tok.Space, buf, Bib)
@@ -223,6 +236,7 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			if err != nil {
 				return element, err
 			}
+			// Non-destructively copy the quote into val
 			val = append(val, []byte("{")[0])
 			val = append(val[:], between[:]...)
 			val = append(val, []byte("}")[0])
@@ -232,6 +246,7 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			if err != nil {
 				return element, err
 			}
+			// Non-destructively copy the quote into val
 			val = append(val, []byte("\"")[0])
 			val = append(val[:], between[:]...)
 			val = append(val, []byte("\"")[0])
@@ -242,11 +257,11 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			if len(key) > 0 {
 				//make a map entry
 				tags[string(key)] = string(val)
-				key = nil
-			} else {
+			} else if len(val) > 0 {
 				// append to element keys
 				keys = append(keys, string(val))
 			}
+			key = nil
 			val = nil
 		case token.Type == tok.Punctuation && bytes.Equal(token.Value, []byte("#")):
 			val = append(val[:], []byte(" # ")[:]...)
@@ -254,8 +269,12 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			val = append(val[:], token.Value[:]...)
 		}
 	}
-	element.Keys = keys
-	element.Tags = tags
+	if len(keys) > 0 {
+		element.Keys = keys
+	}
+	if len(tags) > 0 {
+		element.Tags = tags
+	}
 	return element, nil
 }
 
@@ -327,6 +346,21 @@ func (a ByKey) Less(i, j int) bool {
 	return strings.Compare(a[i], a[j]) < 0
 }
 
+func compareTagValues(val1, val2 string) bool {
+	if strings.Compare(val1, val2) == 0 {
+		return true
+	}
+	if len(val1) > 2 && len(val2) > 2 {
+		// Drop the quoting char and compare the string.
+		i1 := len(val1) - 1
+		i2 := len(val2) - 1
+		if strings.Compare(val1[1:i1], val2[1:i2]) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
 // Equal compares two Element structures and sees if the contents agree
 func Equal(elem1, elem2 *Element) bool {
 	if strings.Compare(elem1.Type, elem2.Type) != 0 {
@@ -353,7 +387,7 @@ func Equal(elem1, elem2 *Element) bool {
 	for ky, val1 := range elem1.Tags {
 		if val2, ok := elem2.Tags[ky]; ok != true {
 			return false
-		} else if strings.Compare(val1, val2) != 0 {
+		} else if compareTagValues(val1, val2) == false {
 			return false
 		}
 	}
