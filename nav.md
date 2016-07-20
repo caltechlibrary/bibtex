@@ -1,7 +1,7 @@
 
 + [Home](/)
-+ [bibfilter](./)
-+ [bibfilter webapp](./webapp/)
++ [bibtex](./)
++ [webapp](./webapp/)
 + [Source Code](https://github.com/caltechlibrary/bibtex)
 + [README](./readme.html)
 + [INSTALL](./installation.html)

@@ -23,6 +23,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"sort"
 	"strings"
 
 	// Caltech Library packages
@@ -131,21 +132,27 @@ func (element *Element) String() string {
 
 	out = append(out, fmt.Sprintf("@%s{", element.Type))
 	if len(element.Keys) > 0 {
-		for _, ky := range element.Keys {
+		for i, ky := range element.Keys {
 			if len(ky) > 0 {
-				out = append(out, fmt.Sprintf("    %s,", ky))
+				if i == 0 {
+					out = append(out, fmt.Sprintf("%s,\n", ky))
+				} else {
+					out = append(out, fmt.Sprintf("    %s,\n", ky))
+				}
 			}
 		}
+	} else {
+		out = append(out, "\n")
 	}
 
 	if len(element.Tags) > 0 {
 		for ky, val := range element.Tags {
-			out = append(out, fmt.Sprintf("    %s = %s,", ky, val))
+			out = append(out, fmt.Sprintf("    %s = %s,\n", ky, val))
 		}
 	}
 
-	out = append(out, fmt.Sprintf("}"))
-	return strings.Join(out, "\n")
+	out = append(out, fmt.Sprintf("}\n"))
+	return strings.Join(out, "")
 }
 
 //
@@ -212,6 +219,13 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 
 	for {
 		if len(buf) == 0 {
+			if len(key) > 0 {
+				// We have a trailing key/value pair to save.
+				tags[string(key)] = string(val)
+			} else if len(val) > 0 {
+				// We have a trailing key to save.
+				keys = append(keys, string(val))
+			}
 			break
 		}
 		_, token, buf = tok.Skip2(tok.Space, buf, Bib)
@@ -222,6 +236,7 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			if err != nil {
 				return element, err
 			}
+			// Non-destructively copy the quote into val
 			val = append(val, []byte("{")[0])
 			val = append(val[:], between[:]...)
 			val = append(val, []byte("}")[0])
@@ -231,6 +246,7 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			if err != nil {
 				return element, err
 			}
+			// Non-destructively copy the quote into val
 			val = append(val, []byte("\"")[0])
 			val = append(val[:], between[:]...)
 			val = append(val, []byte("\"")[0])
@@ -241,11 +257,11 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			if len(key) > 0 {
 				//make a map entry
 				tags[string(key)] = string(val)
-				key = nil
-			} else {
+			} else if len(val) > 0 {
 				// append to element keys
 				keys = append(keys, string(val))
 			}
+			key = nil
 			val = nil
 		case token.Type == tok.Punctuation && bytes.Equal(token.Value, []byte("#")):
 			val = append(val[:], []byte(" # ")[:]...)
@@ -253,8 +269,12 @@ func mkElement(elementType string, buf []byte) (*Element, error) {
 			val = append(val[:], token.Value[:]...)
 		}
 	}
-	element.Keys = keys
-	element.Tags = tags
+	if len(keys) > 0 {
+		element.Keys = keys
+	}
+	if len(tags) > 0 {
+		element.Tags = tags
+	}
 	return element, nil
 }
 
@@ -306,4 +326,142 @@ func Parse(buf []byte) ([]*Element, error) {
 		err = fmt.Errorf("no elements found")
 	}
 	return elements, nil
+}
+
+// ByKey struct is for sorting Element Keys
+type ByKey []string
+
+// Len of ByKey array
+func (a ByKey) Len() int {
+	return len(a)
+}
+
+// Swap of ByKey array elements
+func (a ByKey) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+// Less return the lesser of ByKey array elements
+func (a ByKey) Less(i, j int) bool {
+	return strings.Compare(a[i], a[j]) < 0
+}
+
+func compareTagValues(val1, val2 string) bool {
+	if strings.Compare(val1, val2) == 0 {
+		return true
+	}
+	if len(val1) > 2 && len(val2) > 2 {
+		// Drop the quoting char and compare the string.
+		i1 := len(val1) - 1
+		i2 := len(val2) - 1
+		if strings.Compare(val1[1:i1], val2[1:i2]) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// Equal compares two Element structures and sees if the contents agree
+func Equal(elem1, elem2 *Element) bool {
+	if strings.Compare(elem1.Type, elem2.Type) != 0 {
+		return false
+	}
+	// We have differing number of keys or Tags then we're not equal
+	if len(elem1.Keys) != len(elem2.Keys) || len(elem1.Tags) != len(elem2.Tags) {
+		return false
+	}
+
+	// Sort and compare the keys
+	keys1 := elem1.Keys[0:]
+	keys2 := elem2.Keys[0:]
+	sort.Sort(ByKey(keys1))
+	sort.Sort(ByKey(keys2))
+
+	// We have to find
+	for i, ky := range keys1 {
+		if strings.Compare(keys2[i], ky) != 0 {
+			return false
+		}
+	}
+
+	for ky, val1 := range elem1.Tags {
+		if val2, ok := elem2.Tags[ky]; ok != true {
+			return false
+		} else if compareTagValues(val1, val2) == false {
+			return false
+		}
+	}
+
+	return true
+}
+
+// NotEqual compares two element structures and see if the contents disagree
+func NotEqual(elem1, elem2 *Element) bool {
+	return Equal(elem1, elem2) == false
+}
+
+// Clone creates a new Element based on an existing element
+func Clone(elem *Element) *Element {
+	newElem := new(Element)
+	newElem.XMLName = elem.XMLName
+	newElem.Type = elem.Type
+	newElem.Tags = make(map[string]string)
+	for _, ky := range elem.Keys {
+		newElem.Keys = append(newElem.Keys, ky)
+	}
+	for ky, val := range elem.Tags {
+		newElem.Tags[ky] = val
+	}
+	return newElem
+}
+
+// Contains checks an array of Elements for a specific element
+func Contains(elemList []*Element, target *Element) bool {
+	for _, elem := range elemList {
+		if Equal(elem, target) == true {
+			return true
+		}
+	}
+	return false
+}
+
+// Join create a new Element array by combining to Element arrays without creating duplicate entries
+func Join(elemList1, elemList2 []*Element) []*Element {
+	var result []*Element
+	result = elemList1[0:]
+	for _, elem := range elemList2 {
+		if Contains(result, elem) == false {
+			result = append(result, elem)
+		}
+	}
+	return result
+}
+
+// Diff creates a new Element Array of all the elements in elemList1 an not in elemList2
+func Diff(elemList1, elemList2 []*Element) []*Element {
+	var result []*Element
+	for _, elem := range elemList1 {
+		if Contains(elemList2, elem) == false {
+			result = append(result, elem)
+		}
+	}
+	return result
+}
+
+// Intersect create a new Element Array of elements in both elemList1 and elemList2
+func Intersect(elemList1, elemList2 []*Element) []*Element {
+	var result []*Element
+	for _, elem := range elemList1 {
+		if Contains(elemList2, elem) == true {
+			result = append(result, elem)
+		}
+	}
+	return result
+}
+
+// Exclusive create a new Element Array with elements that only exist in elemList1 or elemList2
+func Exclusive(elemList1, elemList2 []*Element) []*Element {
+	A := Diff(elemList1, elemList2)
+	B := Diff(elemList2, elemList1)
+	return Join(A, B)
 }
