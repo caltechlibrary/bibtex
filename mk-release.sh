@@ -4,7 +4,7 @@
 #
 RELEASE_NAME=bibtex
 
-for PROGNAME in bibfilter bibmerge; do
+for PROGNAME in bibfilter bibmerge bibscrape; do
     env GOOS=linux GOARCH=amd64 go build -o dist/linux-amd64/$PROGNAME cmds/$PROGNAME/$PROGNAME.go
     env GOOS=windows GOARCH=amd64 go build -o dist/windows-amd64/$PROGNAME.exe cmds/$PROGNAME/$PROGNAME.go
     env GOOS=darwin	GOARCH=amd64 go build -o dist/macosx-amd64/$PROGNAME cmds/$PROGNAME/$PROGNAME.go
