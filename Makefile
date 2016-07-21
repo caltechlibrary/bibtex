@@ -11,7 +11,7 @@ build:
 install:
 	env GOBIN=$(HOME)/bin go install cmds/bibfilter/bibfilter.go
 	env GOBIN=$(HOME)/bin go install cmds/bibmerge/bibmerge.go
-	env GOBIN=$(HOME)/bin go install cmds/bibscrape/bibscrage.go
+	env GOBIN=$(HOME)/bin go install cmds/bibscrape/bibscrape.go
 
 test:
 	go test
