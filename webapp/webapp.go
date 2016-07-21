@@ -52,8 +52,15 @@ func (b *BibTeX) Parse(buf, include, exclude string) string {
 	return strings.Join(out, "\n")
 }
 
-func (b *BibTeX) Scrape(entry string) string {
+// Scrape wraps go Scrape but adds an optional id string
+func (b *BibTeX) Scrape(entry string, asType string, id string) string {
 	elem := scrape.Scrape([]byte(entry))
+	if id != "" {
+		elem.Keys = append(elem.Keys, id)
+	}
+	if asType != "" {
+		elem.Type = asType
+	}
 	return elem.String()
 }
 

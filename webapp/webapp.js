@@ -32302,18 +32302,24 @@ $packages["github.com/caltechlibrary/bibtex/webapp"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: BibTeX.ptr.prototype.Parse }; } $f.$ptr = $ptr; $f._i = _i; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tuple = _tuple; $f.b = b; $f.buf = buf; $f.element = element; $f.elements = elements; $f.err = err; $f.exclude = exclude; $f.include = include; $f.out = out; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	BibTeX.prototype.Parse = function(buf, include, exclude) { return this.$val.Parse(buf, include, exclude); };
-	BibTeX.ptr.prototype.Scrape = function(entry) {
-		var $ptr, _r, _r$1, b, elem, entry, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; b = $f.b; elem = $f.elem; entry = $f.entry; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+	BibTeX.ptr.prototype.Scrape = function(entry, asType, id) {
+		var $ptr, _r, _r$1, asType, b, elem, entry, id, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; asType = $f.asType; b = $f.b; elem = $f.elem; entry = $f.entry; id = $f.id; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		b = this;
 		_r = scrape.Scrape(new sliceType$1($stringToBytes(entry))); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		elem = _r;
+		if (!(id === "")) {
+			elem.Keys = $append(elem.Keys, id);
+		}
+		if (!(asType === "")) {
+			elem.Type = asType;
+		}
 		_r$1 = elem.String(); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 		/* */ $s = 3; case 3:
 		return _r$1;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: BibTeX.ptr.prototype.Scrape }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f.b = b; $f.elem = elem; $f.entry = entry; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: BibTeX.ptr.prototype.Scrape }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f.asType = asType; $f.b = b; $f.elem = elem; $f.entry = entry; $f.id = id; $f.$s = $s; $f.$r = $r; return $f;
 	};
-	BibTeX.prototype.Scrape = function(entry) { return this.$val.Scrape(entry); };
+	BibTeX.prototype.Scrape = function(entry, asType, id) { return this.$val.Scrape(entry, asType, id); };
 	BibTeX.ptr.prototype.Join = function(srcA, srcB) {
 		var $ptr, _i, _r, _r$1, _r$2, _r$3, _ref, _tuple, _tuple$1, b, element, err, listA, listB, listC, out, srcA, srcB, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _i = $f._i; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _ref = $f._ref; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; b = $f.b; element = $f.element; err = $f.err; listA = $f.listA; listB = $f.listB; listC = $f.listC; out = $f.out; srcA = $f.srcA; srcB = $f.srcB; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -32459,7 +32465,7 @@ $packages["github.com/caltechlibrary/bibtex/webapp"] = (function() {
 		var $ptr;
 		$global.bibtex = $externalize($makeMap($String.keyFor, [{ k: "New", v: new funcType(New) }]), mapType);
 	};
-	ptrType$1.methods = [{prop: "Parse", name: "Parse", pkg: "", typ: $funcType([$String, $String, $String], [$String], false)}, {prop: "Scrape", name: "Scrape", pkg: "", typ: $funcType([$String], [$String], false)}, {prop: "Join", name: "Join", pkg: "", typ: $funcType([$String, $String], [$String], false)}, {prop: "Diff", name: "Diff", pkg: "", typ: $funcType([$String, $String], [$String], false)}, {prop: "Intersect", name: "Intersect", pkg: "", typ: $funcType([$String, $String], [$String], false)}, {prop: "Exclusive", name: "Exclusive", pkg: "", typ: $funcType([$String, $String], [$String], false)}];
+	ptrType$1.methods = [{prop: "Parse", name: "Parse", pkg: "", typ: $funcType([$String, $String, $String], [$String], false)}, {prop: "Scrape", name: "Scrape", pkg: "", typ: $funcType([$String, $String, $String], [$String], false)}, {prop: "Join", name: "Join", pkg: "", typ: $funcType([$String, $String], [$String], false)}, {prop: "Diff", name: "Diff", pkg: "", typ: $funcType([$String, $String], [$String], false)}, {prop: "Intersect", name: "Intersect", pkg: "", typ: $funcType([$String, $String], [$String], false)}, {prop: "Exclusive", name: "Exclusive", pkg: "", typ: $funcType([$String, $String], [$String], false)}];
 	BibTeX.init([]);
 	$init = function() {
 		$pkg.$init = function() {};

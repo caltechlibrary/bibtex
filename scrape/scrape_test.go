@@ -164,7 +164,7 @@ func TestScrape(t *testing.T) {
 		t.FailNow()
 	}
 
-	// Scan buffer, find entries and convert to psuedo BibTeX
+	// Scan buffer, find entries and convert to pseudo BibTeX
 	buf = goddardSample[:]
 	i := 1
 	for {
@@ -181,7 +181,7 @@ func TestScrape(t *testing.T) {
 		i++
 	}
 
-	// Scan buffer, find entries and convert to psuedo BibTeX
+	// Scan buffer, find entries and convert to pseudo BibTeX
 	buf = mineralogySample[:]
 	i = 1
 	for {

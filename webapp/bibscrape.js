@@ -5,6 +5,7 @@
     'use strict';
     var inputTextArea = document.getElementById("input-source"),
         outputTextArea = document.getElementById("output-bibtex"),
+        entryType = document.getElementById("entry-type"),
         entrySeparator = document.getElementById("entry-separator"),
         submitButton = document.getElementById("scrape"),
         cmdExample = document.getElementById("cmd-example-bibtex");
@@ -22,26 +23,34 @@
         var scrape = bibtex.New(),
             cmd = [],
             out = [],
-            separator = "",
+            separator = "\n\n",
+            entry_type = "pseudo",
             src = "",
             entries = [],
             entry = "";
 
-        entry = "    ";
-        separator = entrySeparator.value;
-        src = "    " + inputTextArea.value;
+        // Update the default values if needed
+        if (entrySeparator.value != undefined && entrySeparator.value !== "") {
+            separator = entrySeparator.value;
+        }
+        if (entryType.value != undefined && entryType.value !== "") {
+            entry_type = entryType.value;
+        }
+
+        src = inputTextArea.value;
         entries = splitEntries(src, separator)
-        entries.forEach(function(item) {
-            if (item.trim() != "") {
-                console.log("DEBUG item", item);
-                out.push(scrape.Scrape(item));
+        entries.forEach(function(item, i) {
+            if (item.trim() !== "") {
+                out.push(scrape.Scrape(item, entry_type, "pseudo_id_" + i));
             }
         });
 
         outputTextArea.value = out.join("\n\n") 
         if (cmdExample) {
             cmd.push("bibscrape");
+            cmd.push("-t " + entry_type);
             cmd.push("-e '" + separator + "'");
+            cmd.push("-k");
             cmd.push("example.txt");
             cmd.push("> example.bib");
             cmdExample.value = cmd.join(" ");

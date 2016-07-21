@@ -1,4 +1,4 @@
-// bibscrape - scrape a plain text file and render a psuedo BibTeX record that will import into JabRef.
+// bibscrape - scrape a plain text file and render a pseudo BibTeX record that will import into JabRef.
 //
 // @author R. S. Doiel, <rsdoiel@caltech.edu>
 //
@@ -36,6 +36,8 @@ var (
 	showLicense bool
 
 	entrySeparator = "(\n|\r\n)"
+	useType        = `pseudo`
+	addKeys        bool
 )
 
 func usage(fp *os.File, appname string) {
@@ -43,7 +45,7 @@ func usage(fp *os.File, appname string) {
  USAGE %s [OPTIONS] FILENAME
 
  Parse the plain text file for BibTeX entry making a best guess
- to generate psuedo bib entries that can import into JabRef for
+ to generate pseudo bib entries that can import into JabRef for
  cleanup.
 
  OPTIONS
@@ -93,10 +95,13 @@ func init() {
 	flag.BoolVar(&showVersion, "v", false, "display version")
 	flag.BoolVar(&showLicense, "l", false, "display license")
 
-	flag.StringVar(&entrySeparator, "e", entrySeparator, `Set the default entry separator (\n\n)`)
+	flag.BoolVar(&addKeys, "k", false, "add a missing key")
+	flag.StringVar(&entrySeparator, "e", entrySeparator, `Set the default entry separator (defaults to \n\n)`)
+	flag.StringVar(&useType, "t", useType, `Set the entry type  (defaults to pseudo)`)
 }
 
 func main() {
+	pseudo_id := 0
 	appname := path.Base(os.Args[0])
 	flag.Parse()
 
@@ -133,6 +138,13 @@ func main() {
 			entry, buf = scrape.NextEntry(buf, re)
 			if len(entry) > 0 {
 				elem = scrape.Scrape(entry)
+				if useType != "" {
+					elem.Type = useType
+				}
+				if addKeys == true && len(elem.Keys) == 0 {
+					elem.Keys = append(elem.Keys, fmt.Sprintf("pseudo_id_%d", pseudo_id))
+					pseudo_id++
+				}
 				fmt.Fprintf(os.Stdout, "%s\n\n", elem)
 			}
 			entry = nil
