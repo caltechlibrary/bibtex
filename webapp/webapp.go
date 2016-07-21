@@ -23,7 +23,9 @@ import (
 
 	// Caltech Library packages
 	"github.com/caltechlibrary/bibtex"
+	"github.com/caltechlibrary/bibtex/scrape"
 
+	// 3rd Party packages
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -48,6 +50,11 @@ func (b *BibTeX) Parse(buf, include, exclude string) string {
 		}
 	}
 	return strings.Join(out, "\n")
+}
+
+func (b *BibTeX) Scrape(entry string) string {
+	elem := scrape.Scrape([]byte(entry))
+	return elem.String()
 }
 
 func (b *BibTeX) Join(srcA, srcB string) string {
