@@ -21,6 +21,9 @@ package scrape
 import (
 	"bytes"
 	"testing"
+
+	// Caltech Library Packages
+	"github.com/caltechlibrary/tok"
 )
 
 func TestDoi(t *testing.T) {
@@ -85,6 +88,38 @@ func TestISSN(t *testing.T) {
 	expected = []byte(`ISSN:1534-0481`)
 	issn = ISSN(sample)
 	OK(expected, issn)
+}
+
+func TestPageRange(t *testing.T) {
+	var (
+		result []byte
+		line   []byte
+	)
+	sample := []byte(`This is just
+	a chunk of test which might have pp 9-100 various
+	types of pages and page ranges.  Can we pull them
+	out pages 102-110?
+	pp. 3 -- 24 on some more blah, blah blah
+`)
+	expected := [][]byte{
+		[]byte(``),
+		[]byte(`pp 9-100`),
+		[]byte(``),
+		[]byte(`pages 102-110`),
+		[]byte(`pp. 3 -- 24`),
+	}
+
+	OK := func(i int, expected, found []byte) {
+		if bytes.Compare(expected, found) != 0 {
+			t.Errorf("%d: expected %q, found %q", i, expected, found)
+		}
+	}
+
+	for i, exp := range expected {
+		line, sample = tok.NextLine(sample)
+		result = PageRange(line)
+		OK(i, exp, result)
+	}
 }
 
 /*

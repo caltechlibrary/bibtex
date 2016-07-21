@@ -55,12 +55,12 @@ func Doi(buf []byte) []byte {
 }
 
 func ISSN(buf []byte) []byte {
-	re := regexp.MustCompile(`([iI][sS][sS][nN]|[eE][iI][sS][sS][nN]( +|))[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9a-zA-Z]+`)
+	re := regexp.MustCompile(`([iI][sS][sS][nN]|[eE][iI][sS][sS][nN])( +|:|)([0-9][0-9][0-9][0-9])-([0-9][0-9][0-9][0-9a-zA-Z])+`)
 	return bytes.TrimSpace(re.Find(buf))
 }
 
 func PageRange(buf []byte) []byte {
-	re := regexp.MustCompile(`[pP][pP]. [0-9]+(--|-)[0-9]+`)
+	re := regexp.MustCompile(`([pP][pP]|[pP][pP]\.|[pP][gG]|[pP][gG]\.|[pP][gG][sS]|[pP][gG][sS]\.|[pP][aA][gG][eE]|[pP][aA][gG][eE][sS])( +)[0-9]+(--|-| - | -- )[0-9]+`)
 	return re.Find(buf)
 }
 
