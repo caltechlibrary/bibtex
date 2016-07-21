@@ -32,7 +32,7 @@ import (
 
 const (
 	// Version of BibTeX package
-	Version = "v0.0.4"
+	Version = "v0.0.7"
 
 	// DefaultInclude list
 	DefaultInclude = "comment,string,article,book,booklet,inbook,incollection,inproceedings,conference,manual,masterthesis,misc,phdthesis,proceedings,techreport,unpublished"
