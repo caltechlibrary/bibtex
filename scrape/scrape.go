@@ -20,51 +20,83 @@ package scrape
 
 import (
 	"bytes"
+	"fmt"
 	"regexp"
+
+	// Caltech Library Packages
+	"github.com/caltechlibrary/bibtex"
 )
 
-// Entry takes a a regexp finding start of record and a buffer []byte and returns entry
-// as []byte, remaining buffer []byte
-func Entry(re *regexp.Regexp, buf []byte) ([]byte, []byte) {
-	start := re.FindIndex(buf)
-	if start == nil {
-		return []byte{}, []byte{}
-	}
-	i := start[1]
-	if i < len(buf) {
-		end := re.FindIndex(buf[i:])
-		if end != nil {
-			j := end[0]
-			return buf[start[0] : i+j], buf[i+j:]
-		}
-	}
-	return buf[start[0]:], []byte{}
-}
+var (
+	// LineSeparator a regexp describing common line separation
+	LineSeparator = regexp.MustCompile(`(\n|\r\n)`)
+	// DefaultEntrySeparator a regexp describing common entry separator
+	DefaultEntrySeparator = regexp.MustCompile(`(\n\n|\r\n\r\n)`)
+)
 
-func NextLine(buf []byte) ([]byte, []byte) {
-	i := bytes.Index(buf, []byte("\n"))
-	if i < 0 {
-		return buf, []byte{}
-	}
-	return buf[0:i], buf[i:]
-}
-
-func Doi(buf []byte) []byte {
+// DOI extract the next DOI found in []byte or return an empty []byte
+func DOI(buf []byte) []byte {
 	re := regexp.MustCompile(`([dD][oO][iI] |[dD][oO][iI]:|)( +|)[0-9]+\.[0-9]+/([0-9]|[a-z]|[A-Z]|\.)+`)
 	return bytes.TrimSpace(re.Find(buf))
 }
 
+// ISSN extract the next ISSN found in []byte or return an empty []byte
 func ISSN(buf []byte) []byte {
 	re := regexp.MustCompile(`([iI][sS][sS][nN]|[eE][iI][sS][sS][nN])( +|:|)([0-9][0-9][0-9][0-9])-([0-9][0-9][0-9][0-9a-zA-Z])+`)
 	return bytes.TrimSpace(re.Find(buf))
 }
 
+// PageRange extrasct the next page range found in []byte or return an empty []byte
 func PageRange(buf []byte) []byte {
 	re := regexp.MustCompile(`([pP][pP]|[pP][pP]\.|[pP][gG]|[pP][gG]\.|[pP][gG][sS]|[pP][gG][sS]\.|[pP][aA][gG][eE]|[pP][aA][gG][eE][sS])( +)[0-9]+(--|-| - | -- )[0-9]+`)
 	return re.Find(buf)
 }
 
-func PubYear(buf []byte) []byte {
+// Year extract the next year found in []byte or return an empty []byte
+func Year(buf []byte) []byte {
 	re := regexp.MustCompile(`\(([0-9][0-9][0-9][0-9]|[a-zA-Z]+ [0-9][0-9][0-9][0-9])\)`)
 	return re.Find(buf)
+}
+
+// NextEntry takes a buffer of []byte a Regular expression for splitting the plain text entries
+// and returns the next entry and a remainder buffer both of type []byte
+func NextEntry(buf []byte, re *regexp.Regexp) ([]byte, []byte) {
+	loc := re.FindIndex(buf)
+	if loc == nil {
+		return buf, nil
+	}
+	return buf[0:loc[0]], buf[loc[1]:]
+}
+
+// Scrape takes a buffer of []byte and detects tags based on new lines encountered and
+// specific elements like page ranges, years and month/year phrases,
+// returns a new bibtex.Element
+func Scrape(entry []byte) *bibtex.Element {
+	elem := new(bibtex.Element)
+	elem.Type = "pseudo"
+	elem.Tags = make(map[string]string)
+	// Find year
+	year := Year(entry)
+	if len(year) > 0 {
+		elem.Tags["year"] = fmt.Sprintf("%q", year)
+		entry = bytes.Replace(entry, year, []byte("\n"), 1)
+	}
+	issn := ISSN(entry)
+	if len(issn) > 0 {
+		elem.Tags["issn"] = fmt.Sprintf("%q", issn)
+		entry = bytes.Replace(entry, issn, []byte("\n"), 1)
+	}
+	doi := DOI(entry)
+	if len(doi) > 0 {
+		elem.Tags["doi"] = fmt.Sprintf("%q", doi)
+		entry = bytes.Replace(entry, doi, []byte("\n"), 1)
+	}
+
+	for i, val := range bytes.Split(entry, []byte("\n")) {
+		val = bytes.TrimSpace(val)
+		if len(val) > 0 {
+			elem.Tags[fmt.Sprintf("unknown%d", i)] = fmt.Sprintf("%q", val)
+		}
+	}
+	return elem
 }

@@ -15,6 +15,7 @@
 
 + Example web pages with publication list
     + [Publications dealing with optical spectroscopy of minerals](http://minerals.gps.caltech.edu/mineralogy/Publications/CV_spectra.html)
+    + [William A. Goddard's pub list](http://www.wag.caltech.edu/publications/papers/)
 
 ## About BibTeX
 

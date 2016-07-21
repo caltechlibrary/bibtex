@@ -20,52 +20,57 @@ package scrape
 
 import (
 	"bytes"
+	"io/ioutil"
+	"path"
+	"regexp"
+	"strings"
 	"testing"
 
 	// Caltech Library Packages
+	"github.com/caltechlibrary/bibtex"
 	"github.com/caltechlibrary/tok"
 )
 
-func TestDoi(t *testing.T) {
+func TestDOI(t *testing.T) {
 	sample := []byte(`Blair, K., & Hoy, C. (2006). Paying attention to adult learning online: The pedagogy and politics of community. Computers and Composition, 23(1), 32-48. doi:10.1016/j.compcom.2005.12.006`)
 
 	expected := []byte(`doi:10.1016/j.compcom.2005.12.006`)
-	doi := Doi(sample)
+	doi := DOI(sample)
 	if bytes.Compare(doi, expected) != 0 {
 		t.Errorf("Expected %q, found %q", expected, doi)
 	}
 
 	sample = []byte(`this has no DOI in it.`)
 	expected = []byte(``)
-	doi = Doi(sample)
+	doi = DOI(sample)
 	if bytes.Compare(doi, expected) != 0 {
 		t.Errorf("Expected %q, found %q", expected, doi)
 	}
 
 	sample = []byte(`vlah bahl poerwpoi 'unicorn 10.1000/xyz000' opiewr lad`)
 	expected = []byte(`10.1000/xyz000`)
-	doi = Doi(sample)
+	doi = DOI(sample)
 	if bytes.Compare(doi, expected) != 0 {
 		t.Errorf("Expected %q, found %q", expected, doi)
 	}
 
 	sample = []byte(` opiewn aslkds doi:10.1000/xyz000 opewirwer qw`)
 	expected = []byte(`doi:10.1000/xyz000`)
-	doi = Doi(sample)
+	doi = DOI(sample)
 	if bytes.Compare(doi, expected) != 0 {
 		t.Errorf("Expected %q, found %q", expected, doi)
 	}
 
 	sample = []byte(`Bai, H. (2009). Facilitating students' critical thinking in online discussion: An instructor's experience. Journal of Interactive Online Learning, 8(2), 156-164. Retrieved from http://www.ncolr.org/jiol/`)
 	expected = []byte(``)
-	doi = Doi(sample)
+	doi = DOI(sample)
 	if bytes.Compare(doi, expected) != 0 {
 		t.Errorf("Expected %q, found %q", expected, doi)
 	}
 
 	sample = []byte(`Manny, F. A. (1909). A study in adult education. The School Review, 17(3), 174-177. Retrieved from http://www.jstor.org/`)
 	expected = []byte(``)
-	doi = Doi(sample)
+	doi = DOI(sample)
 	if bytes.Compare(doi, expected) != 0 {
 		t.Errorf("Expected %q, found %q", expected, doi)
 	}
@@ -122,7 +127,6 @@ func TestPageRange(t *testing.T) {
 	}
 }
 
-/*
 func TestScrape(t *testing.T) {
 	var (
 		entry []byte
@@ -130,32 +134,68 @@ func TestScrape(t *testing.T) {
 		err   error
 	)
 
-	sampleBuf := func(b []byte, l int) []byte {
-		if l < len(b) {
-			return b[0:l]
+	okStrings := func(i int, expected, sample string) {
+		if strings.Compare(expected, sample) != 0 {
+			t.Errorf("%d: expected %q, found %q", expected, sample)
 		}
-		return b
+	}
+
+	hasTags := func(i int, tags []string, elem *bibtex.Element) {
+		for _, ky := range tags {
+			if _, ok := elem.Tags[ky]; ok == false {
+				t.Errorf("%d: expected key %s, found none %s", i, ky, elem)
+			}
+		}
 	}
 
 	// Source was http://www.wag.caltech.edu/publications/papers/ on 2016-07-20 at 12:06 PDT
 	fname := path.Join("testdata", "goddard-sample1.txt")
-	goddardSample1, err := ioutil.ReadFile(fname)
+	goddardSample, err := ioutil.ReadFile(fname)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 
-	// Scan buffer, find entries and convert to BibTeX records
-	re := regexp.MustCompile(`[0-9]+\.\n`)
-	buf = goddardSample1[:]
+	// Mineralogy CV example: http://minerals.gps.caltech.edu/mineralogy/Publications/CV_spectra.html
+	fname = path.Join("testdata", "mineralogy-sample.txt")
+	mineralogySample, err := ioutil.ReadFile(fname)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+	// Scan buffer, find entries and convert to psuedo BibTeX
+	buf = goddardSample[:]
 	i := 1
-	for k := 0; k < len(goddardSample1); k++ {
-		entry, buf = Entry(re, buf)
-		fmt.Printf("%d: [%s] [%s]\n", i, sampleBuf(entry, 24), sampleBuf(buf, 24))
-		if len(buf) == 0 || buf == nil {
-			break
+	for {
+		entry, buf = NextEntry(buf, regexp.MustCompile(`[0-9]+\.\n`))
+		if len(entry) > 0 {
+			elem := Scrape(entry)
+			okStrings(i, "pseudo", elem.Type)
+			hasTags(i, []string{"unknown0", "unknown1"}, elem)
+			if len(buf) == 0 || buf == nil {
+				break
+			}
 		}
+		entry = nil
 		i++
 	}
+
+	// Scan buffer, find entries and convert to psuedo BibTeX
+	buf = mineralogySample[:]
+	i = 1
+	for {
+		entry, buf = NextEntry(buf, DefaultEntrySeparator)
+		if len(entry) > 0 {
+			elem := Scrape(entry)
+			okStrings(i, "pseudo", elem.Type)
+			hasTags(i, []string{"unknown0", "unknown1", "year"}, elem)
+			if len(buf) == 0 || buf == nil {
+				break
+			}
+		}
+		entry = nil
+		i++
+	}
+
 }
-*/
