@@ -1,4 +1,4 @@
-// bibscrape - scrape a plain text file and render a psuedo BibTeX record that will import into JabRef.
+// bibscrape - scrape a plain text file and render a pseudo BibTeX record that will import into JabRef.
 //
 // @author R. S. Doiel, <rsdoiel@caltech.edu>
 //
@@ -43,7 +43,7 @@ func usage(fp *os.File, appname string) {
  USAGE %s [OPTIONS] FILENAME
 
  Parse the plain text file for BibTeX entry making a best guess
- to generate psuedo bib entries that can import into JabRef for
+ to generate pseudo bib entries that can import into JabRef for
  cleanup.
 
  OPTIONS
