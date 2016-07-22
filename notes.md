@@ -27,6 +27,11 @@
     + [format](http://www.bibtex.org/Format/)
     + [usage](http://www.bibtex.org/Using/)
 
+## About citation styles
+
++ [Univ. of Pitt. Lib Guides](http://pitt.libguides.com/c.php?g=12108&p=64729) - discussion of different citation styles including APA, MLA, Chicago, etc.
+
+
 ## Open Source Citation Tools
 
 + [JabRef](http://www.jabref.org/) - an open source bibliography reference manager. 
