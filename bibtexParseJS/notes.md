@@ -20,3 +20,10 @@ in create a drop in replacement for the ORCID bibtexParserJS object via cross co
 + Running under NodeJS we should be able to pass all the same tests as currently listed in ORCID's repository
 + Some of these tests should be migrated into the core testing under Go to ensure correctness and compatibility
 
+## Reference
+
++ [ORCID bibtexParseJS](https://github.com/ORCID/bibtexParseJS)
++ [bibtex-parser](https://github.com/mikolalysenko/bibtex-parser)
++ [bibtex-js](http://home.in.tum.de/~muehe/bibtex-js/src/bibtex_js.js)
+    + [demo](http://home.in.tum.de/~muehe/bibtex-js/demo/bibtex.html)
+
