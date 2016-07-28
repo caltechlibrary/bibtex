@@ -27,6 +27,9 @@ clean:
 	if [ -f webapp/webapp.js.map ]; then rm -f webapp/webapp.js.map; fi
 	if [ -f bibtex-binary-release.zip ]; then rm -f bibtex-binary-release.zip; fi
 
+publish:
+	./publish.bash
+
 release:
 	./mk-webapp.bash
 	./mk-website.bash
