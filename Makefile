@@ -28,6 +28,8 @@ clean:
 	if [ -f bibtex-binary-release.zip ]; then rm -f bibtex-binary-release.zip; fi
 
 publish:
+	./mk-webapp.bash
+	./mk-website.bash
 	./publish.bash
 
 release:
