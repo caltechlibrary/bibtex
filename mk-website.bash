@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function softwareCheck() {
-    for CMD in shorthand; do
+    for CMD in mkpage; do
         APP=$(which $CMD)
         if [ "$APP" = "" ]; then
             echo "Skipping, missing $CMD"
@@ -16,14 +16,14 @@ function mkPage () {
     html="$3"
 
     echo "Rendering $html from $content and $nav"
-    shorthand \
-        -e "{{navContent}} :import-markdown: $nav" \
-        -e "{{pageContent}} :import-markdown: $content" \
-        page.shorthand > $html
+    mkpage \
+        "nav=$nav" \
+        "content=$content" \
+        page.tmpl > $html
 }
 
 softwareCheck
-echo "Generating website with shorthand"
+echo "Generating website with mkpage"
 mkPage nav.md index.md index.html
 mkPage nav.md README.md readme.html
 mkPage nav.md INSTALL.md installation.html
