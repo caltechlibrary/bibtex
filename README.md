@@ -51,11 +51,10 @@ Excluse difference (symmetric difference, inverse of intersection) of two bibtex
     bibmerge -exclusive mybib1.bib mybib2.bib
 ```
 
-Symmetric versus asymmetric (not sure this really makes sense, maybe it is not even needed)
+Symmetric versus asymmetric (not sure this really makes sense in practice)
 
-1. Element of A not in list B (asymmetric)
-2. (Element of A not in B) union (Element of B not in A) (symmetric)
+1. (asymmetric) A - B
+2. (symmetric) (A - B) Union (B - A)
 
-Some how I think my boolean logic is faulty...
 
 
