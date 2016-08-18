@@ -27,20 +27,20 @@ body {
 header {
      position: relative;
      display: block;
-     padding: 0.48em;
      color: white;
-     background-color: #616265;
-     border-bottom: 0.1em sod #76777B;
+     background-color: white;
      z-index: 2;
+     height: 105px;
+     vertical-align: middle;
 }
 
 header img {
      position: relative;
      display: inline;
-     padding: 0;
+     padding-left: 20px;
      margin: 0;
-     height: 5em;
-     width: 5em;
+     height: 42px;
+     padding-top: 32px;
 }
 
 header h1 {
@@ -204,11 +204,11 @@ aside ul > ul {
 }
 
 footer {
-     clear: all;
      position: relative;
+     bottom: 0;
      display: block;
      width: 100%;
-     height: 3em;
+     height: 2em;
      color: white;
      background-color: #616265;
 
@@ -228,7 +228,6 @@ footer h1, footer span, footer address {
 }
 
 footer h1 {
-     font-size: 2em;
      font-weight: normal;
 }
 

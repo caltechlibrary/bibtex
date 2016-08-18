@@ -21,6 +21,8 @@ save:
 	git push origin master
 
 clean:
+	if [ -f index.html ]; then /bin/rm *.html; fi
+	if [ -f webapp/index.html ]; then /bin/rm webapp/*.html; fi
 	if [ -d bin ]; then rm -fR bin; fi
 	if [ -d dist ]; then rm -fR dist; fi
 	if [ -f webapp/webapp.js ]; then rm -f webapp/webapp.js; fi
