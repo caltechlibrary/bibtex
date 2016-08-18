@@ -51,3 +51,10 @@ Excluse difference (symmetric difference, inverse of intersection) of two bibtex
     bibmerge -exclusive mybib1.bib mybib2.bib
 ```
 
+Symmetric versus asymmetric (not sure this really makes sense in practice)
+
+1. (asymmetric) A - B
+2. (symmetric) (A - B) Union (B - A)
+
+
+
