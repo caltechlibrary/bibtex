@@ -16,10 +16,10 @@ function mkPage () {
     html="$3"
 
     echo "Rendering $html from $content and $nav"
-    shorthand \
-        -e "{{navContent}} :import-markdown: $nav" \
-        -e "{{pageContent}} :import-markdown: $content" \
-        page.shorthand > $html
+    mkpage \
+        "nav=$nav" \
+        "content=$content" \
+        page.tmpl > $html
 }
 
 softwareCheck
