@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function softwareCheck() {
-    for CMD in mkpage; do
+    for CMD in $@; do
         APP=$(which $CMD)
         if [ "$APP" = "" ]; then
             echo "Skipping, missing $CMD"
@@ -22,9 +22,9 @@ function mkPage () {
         page.tmpl > $html
 }
 
-softwareCheck
-echo "Generating website with mkpage"
-mkPage nav.md index.md index.html
-mkPage nav.md README.md readme.html
-mkPage nav.md INSTALL.md installation.html
+echo "Checking for installed software"
+softwareCheck mkpage
+echo "Generating website"
+mkPage nav.md README.md index.html
+mkPage nav.md INSTALL.md install.html
 mkPage nav.md "markdown:$(cat LICENSE)" license.html
