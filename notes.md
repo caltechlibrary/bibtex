@@ -27,6 +27,11 @@
     + [format](http://www.bibtex.org/Format/)
     + [usage](http://www.bibtex.org/Using/)
 
+## Common Journal names and Abbrev.
+
++ [NIH list](https://www.nlm.nih.gov/tsd/serials/terms_cond.html)
+    + interesting fields: Title, XrTitle (there are often more than on per serial block)
+
 ## About citation styles
 
 + [Univ. of Pitt. Lib Guides](http://pitt.libguides.com/c.php?g=12108&p=64729) - discussion of different citation styles including APA, MLA, Chicago, etc.
