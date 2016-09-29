@@ -59,14 +59,14 @@ the same <em>bibtex</em> golang package for implementation.</p>
 <pre><code>    bibmerge -join mybib1.bib mybib2.bib
 </code></pre>
 
-<p>Difference (asymmetric, set A - B may not equal set B - A) of two bibtex files</p>
-
-<pre><code>    bibmerge -diff mybib1.bib mybib2.bib
-</code></pre>
-
 <p>Intersection of two bibtex files</p>
 
 <pre><code>    bibmerge -intersect mybib1.bib mybib2.bib
+</code></pre>
+
+<p>Difference (A - B), includes items in A but not found in B of two bibtex files.</p>
+
+<pre><code>    bibmerge -diff mybib1.bib mybib2.bib
 </code></pre>
 
 <p>Excluse difference (symmetric difference, inverse of intersection) of two bibtex files</p>
@@ -74,11 +74,21 @@ the same <em>bibtex</em> golang package for implementation.</p>
 <pre><code>    bibmerge -exclusive mybib1.bib mybib2.bib
 </code></pre>
 
-<p>Symmetric versus asymmetric (not sure this really makes sense in practice)</p>
+<p>Symmetric versus asymmetric differences</p>
 
 <ol>
-<li>(asymmetric) A - B</li>
-<li>(symmetric) (A - B) Union (B - A)</li>
+<li>(asymmetric) (A - B)
+
+<ul>
+<li>Content is in A but NOT in B</li>
+<li>Content unique to B would not be included</li>
+</ul></li>
+<li>(symmetric) (A - B) Union (B - A)
+
+<ul>
+<li>Inverse of the the intersection of A and B</li>
+<li>Content unique to A and the content unique to B are included</li>
+</ul></li>
 </ol>
 
 </section>
