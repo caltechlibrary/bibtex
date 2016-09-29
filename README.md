@@ -41,16 +41,16 @@ Join of two bibtex files
     bibmerge -join mybib1.bib mybib2.bib
 ```
 
-Difference (A - B), includes items in A but not found in B of two bibtex files.
-
-```
-    bibmerge -diff mybib1.bib mybib2.bib
-```
-
 Intersection of two bibtex files
 
 ```
     bibmerge -intersect mybib1.bib mybib2.bib
+```
+
+Difference (A - B), includes items in A but not found in B of two bibtex files.
+
+```
+    bibmerge -diff mybib1.bib mybib2.bib
 ```
 
 Excluse difference (symmetric difference, inverse of intersection) of two bibtex files
@@ -59,7 +59,7 @@ Excluse difference (symmetric difference, inverse of intersection) of two bibtex
     bibmerge -exclusive mybib1.bib mybib2.bib
 ```
 
-Symmetric versus asymmetric (not sure this really makes sense in practice)
+Symmetric versus asymmetric differences
 
 1. (asymmetric) (A - B)
     + Content is in A but NOT in B
