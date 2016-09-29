@@ -664,7 +664,7 @@ var $idKey = function(x) {
   return String(x.$id);
 };
 
-var $newType = function(size, kind, string, name, pkg, constructor) {
+var $newType = function(size, kind, string, named, pkg, exported, constructor) {
   var typ;
   switch(kind) {
   case $kindBool:
@@ -735,7 +735,7 @@ var $newType = function(size, kind, string, name, pkg, constructor) {
   case $kindArray:
     typ = function(v) { this.$val = v; };
     typ.wrapped = true;
-    typ.ptr = $newType(4, $kindPtr, "*" + string, "", "", function(array) {
+    typ.ptr = $newType(4, $kindPtr, "*" + string, false, "", false, function(array) {
       this.$get = function() { return array; };
       this.$set = function(v) { typ.copy(this, v); };
       this.$val = array;
@@ -837,7 +837,7 @@ var $newType = function(size, kind, string, name, pkg, constructor) {
   case $kindStruct:
     typ = function(v) { this.$val = v; };
     typ.wrapped = true;
-    typ.ptr = $newType(4, $kindPtr, "*" + string, "", "", constructor);
+    typ.ptr = $newType(4, $kindPtr, "*" + string, false, "", exported, constructor);
     typ.ptr.elem = typ;
     typ.ptr.prototype.$get = function() { return this; };
     typ.ptr.prototype.$set = function(v) { typ.copy(this, v); };
@@ -987,8 +987,9 @@ var $newType = function(size, kind, string, name, pkg, constructor) {
   typ.size = size;
   typ.kind = kind;
   typ.string = string;
-  typ.typeName = name;
+  typ.named = named;
   typ.pkg = pkg;
+  typ.exported = exported;
   typ.methods = [];
   typ.methodSetCache = null;
   typ.comparable = true;
@@ -1021,7 +1022,7 @@ var $methodSet = function(typ) {
       }
       seen[e.typ.string] = true;
 
-      if(e.typ.typeName !== "") {
+      if (e.typ.named) {
         mset = mset.concat(e.typ.methods);
         if (e.indirect) {
           mset = mset.concat($ptrType(e.typ).methods);
@@ -1061,24 +1062,24 @@ var $methodSet = function(typ) {
   return typ.methodSetCache;
 };
 
-var $Bool          = $newType( 1, $kindBool,          "bool",           "bool",       "", null);
-var $Int           = $newType( 4, $kindInt,           "int",            "int",        "", null);
-var $Int8          = $newType( 1, $kindInt8,          "int8",           "int8",       "", null);
-var $Int16         = $newType( 2, $kindInt16,         "int16",          "int16",      "", null);
-var $Int32         = $newType( 4, $kindInt32,         "int32",          "int32",      "", null);
-var $Int64         = $newType( 8, $kindInt64,         "int64",          "int64",      "", null);
-var $Uint          = $newType( 4, $kindUint,          "uint",           "uint",       "", null);
-var $Uint8         = $newType( 1, $kindUint8,         "uint8",          "uint8",      "", null);
-var $Uint16        = $newType( 2, $kindUint16,        "uint16",         "uint16",     "", null);
-var $Uint32        = $newType( 4, $kindUint32,        "uint32",         "uint32",     "", null);
-var $Uint64        = $newType( 8, $kindUint64,        "uint64",         "uint64",     "", null);
-var $Uintptr       = $newType( 4, $kindUintptr,       "uintptr",        "uintptr",    "", null);
-var $Float32       = $newType( 4, $kindFloat32,       "float32",        "float32",    "", null);
-var $Float64       = $newType( 8, $kindFloat64,       "float64",        "float64",    "", null);
-var $Complex64     = $newType( 8, $kindComplex64,     "complex64",      "complex64",  "", null);
-var $Complex128    = $newType(16, $kindComplex128,    "complex128",     "complex128", "", null);
-var $String        = $newType( 8, $kindString,        "string",         "string",     "", null);
-var $UnsafePointer = $newType( 4, $kindUnsafePointer, "unsafe.Pointer", "Pointer",    "", null);
+var $Bool          = $newType( 1, $kindBool,          "bool",           true, "", false, null);
+var $Int           = $newType( 4, $kindInt,           "int",            true, "", false, null);
+var $Int8          = $newType( 1, $kindInt8,          "int8",           true, "", false, null);
+var $Int16         = $newType( 2, $kindInt16,         "int16",          true, "", false, null);
+var $Int32         = $newType( 4, $kindInt32,         "int32",          true, "", false, null);
+var $Int64         = $newType( 8, $kindInt64,         "int64",          true, "", false, null);
+var $Uint          = $newType( 4, $kindUint,          "uint",           true, "", false, null);
+var $Uint8         = $newType( 1, $kindUint8,         "uint8",          true, "", false, null);
+var $Uint16        = $newType( 2, $kindUint16,        "uint16",         true, "", false, null);
+var $Uint32        = $newType( 4, $kindUint32,        "uint32",         true, "", false, null);
+var $Uint64        = $newType( 8, $kindUint64,        "uint64",         true, "", false, null);
+var $Uintptr       = $newType( 4, $kindUintptr,       "uintptr",        true, "", false, null);
+var $Float32       = $newType( 4, $kindFloat32,       "float32",        true, "", false, null);
+var $Float64       = $newType( 8, $kindFloat64,       "float64",        true, "", false, null);
+var $Complex64     = $newType( 8, $kindComplex64,     "complex64",      true, "", false, null);
+var $Complex128    = $newType(16, $kindComplex128,    "complex128",     true, "", false, null);
+var $String        = $newType( 8, $kindString,        "string",         true, "", false, null);
+var $UnsafePointer = $newType( 4, $kindUnsafePointer, "unsafe.Pointer", true, "", false, null);
 
 var $nativeArray = function(elemKind) {
   switch (elemKind) {
@@ -1120,7 +1121,7 @@ var $arrayType = function(elem, len) {
   var typeKey = elem.id + "$" + len;
   var typ = $arrayTypes[typeKey];
   if (typ === undefined) {
-    typ = $newType(12, $kindArray, "[" + len + "]" + elem.string, "", "", null);
+    typ = $newType(12, $kindArray, "[" + len + "]" + elem.string, false, "", false, null);
     $arrayTypes[typeKey] = typ;
     typ.init(elem, len);
   }
@@ -1132,7 +1133,7 @@ var $chanType = function(elem, sendOnly, recvOnly) {
   var field = sendOnly ? "SendChan" : (recvOnly ? "RecvChan" : "Chan");
   var typ = elem[field];
   if (typ === undefined) {
-    typ = $newType(4, $kindChan, string, "", "", null);
+    typ = $newType(4, $kindChan, string, false, "", false, null);
     elem[field] = typ;
     typ.init(elem, sendOnly, recvOnly);
   }
@@ -1167,7 +1168,7 @@ var $funcType = function(params, results, variadic) {
     } else if (results.length > 1) {
       string += " (" + $mapArray(results, function(r) { return r.string; }).join(", ") + ")";
     }
-    typ = $newType(4, $kindFunc, string, "", "", null);
+    typ = $newType(4, $kindFunc, string, false, "", false, null);
     $funcTypes[typeKey] = typ;
     typ.init(params, results, variadic);
   }
@@ -1185,7 +1186,7 @@ var $interfaceType = function(methods) {
         return (m.pkg !== "" ? m.pkg + "." : "") + m.name + m.typ.string.substr(4);
       }).join("; ") + " }";
     }
-    typ = $newType(8, $kindInterface, string, "", "", null);
+    typ = $newType(8, $kindInterface, string, false, "", false, null);
     $interfaceTypes[typeKey] = typ;
     typ.init(methods);
   }
@@ -1193,7 +1194,7 @@ var $interfaceType = function(methods) {
 };
 var $emptyInterface = $interfaceType([]);
 var $ifaceNil = {};
-var $error = $newType(8, $kindInterface, "error", "error", "", null);
+var $error = $newType(8, $kindInterface, "error", true, "", false, null);
 $error.init([{prop: "Error", name: "Error", pkg: "", typ: $funcType([], [$String], false)}]);
 
 var $mapTypes = {};
@@ -1201,7 +1202,7 @@ var $mapType = function(key, elem) {
   var typeKey = key.id + "$" + elem.id;
   var typ = $mapTypes[typeKey];
   if (typ === undefined) {
-    typ = $newType(4, $kindMap, "map[" + key.string + "]" + elem.string, "", "", null);
+    typ = $newType(4, $kindMap, "map[" + key.string + "]" + elem.string, false, "", false, null);
     $mapTypes[typeKey] = typ;
     typ.init(key, elem);
   }
@@ -1219,7 +1220,7 @@ var $makeMap = function(keyForFunc, entries) {
 var $ptrType = function(elem) {
   var typ = elem.ptr;
   if (typ === undefined) {
-    typ = $newType(4, $kindPtr, "*" + elem.string, "", "", null);
+    typ = $newType(4, $kindPtr, "*" + elem.string, false, "", elem.exported, null);
     elem.ptr = typ;
     typ.init(elem);
   }
@@ -1241,7 +1242,7 @@ var $indexPtr = function(array, index, constructor) {
 var $sliceType = function(elem) {
   var typ = elem.slice;
   if (typ === undefined) {
-    typ = $newType(12, $kindSlice, "[]" + elem.string, "", "", null);
+    typ = $newType(12, $kindSlice, "[]" + elem.string, false, "", false, null);
     elem.slice = typ;
     typ.init(elem);
   }
@@ -1277,7 +1278,7 @@ var $structType = function(pkgPath, fields) {
     if (fields.length === 0) {
       string = "struct {}";
     }
-    typ = $newType(0, $kindStruct, string, "", "", function() {
+    typ = $newType(0, $kindStruct, string, false, "", false, function() {
       this.$val = this;
       for (var i = 0; i < fields.length; i++) {
         var f = fields[i];
@@ -2080,7 +2081,7 @@ var $internalize = function(v, t, recv) {
 
 $packages["github.com/gopherjs/gopherjs/js"] = (function() {
 	var $pkg = {}, $init, Object, Error, sliceType, ptrType, sliceType$2, funcType, ptrType$1, MakeFunc, MakeWrapper, init;
-	Object = $pkg.Object = $newType(0, $kindStruct, "js.Object", "Object", "github.com/gopherjs/gopherjs/js", function(object_) {
+	Object = $pkg.Object = $newType(0, $kindStruct, "js.Object", true, "github.com/gopherjs/gopherjs/js", true, function(object_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.object = null;
@@ -2088,7 +2089,7 @@ $packages["github.com/gopherjs/gopherjs/js"] = (function() {
 		}
 		this.object = object_;
 	});
-	Error = $pkg.Error = $newType(0, $kindStruct, "js.Error", "Error", "github.com/gopherjs/gopherjs/js", function(Object_) {
+	Error = $pkg.Error = $newType(0, $kindStruct, "js.Error", true, "github.com/gopherjs/gopherjs/js", true, function(Object_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Object = null;
@@ -2275,7 +2276,7 @@ $packages["runtime"] = (function() {
 	var $pkg = {}, $init, js, sys, TypeAssertionError, errorString, ptrType$3, init, Goexit, SetFinalizer;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	sys = $packages["runtime/internal/sys"];
-	TypeAssertionError = $pkg.TypeAssertionError = $newType(0, $kindStruct, "runtime.TypeAssertionError", "TypeAssertionError", "runtime", function(interfaceString_, concreteString_, assertedString_, missingMethod_) {
+	TypeAssertionError = $pkg.TypeAssertionError = $newType(0, $kindStruct, "runtime.TypeAssertionError", true, "runtime", true, function(interfaceString_, concreteString_, assertedString_, missingMethod_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.interfaceString = "";
@@ -2289,7 +2290,7 @@ $packages["runtime"] = (function() {
 		this.assertedString = assertedString_;
 		this.missingMethod = missingMethod_;
 	});
-	errorString = $pkg.errorString = $newType(8, $kindString, "runtime.errorString", "errorString", "runtime", null);
+	errorString = $pkg.errorString = $newType(8, $kindString, "runtime.errorString", true, "runtime", false, null);
 	ptrType$3 = $ptrType(TypeAssertionError);
 	init = function() {
 		var $ptr, e, jsPkg;
@@ -2360,7 +2361,7 @@ $packages["runtime"] = (function() {
 })();
 $packages["errors"] = (function() {
 	var $pkg = {}, $init, errorString, ptrType, New;
-	errorString = $pkg.errorString = $newType(0, $kindStruct, "errors.errorString", "errorString", "errors", function(s_) {
+	errorString = $pkg.errorString = $newType(0, $kindStruct, "errors.errorString", true, "errors", false, function(s_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.s = "";
@@ -2471,7 +2472,7 @@ $packages["sync"] = (function() {
 	race = $packages["internal/race"];
 	runtime = $packages["runtime"];
 	atomic = $packages["sync/atomic"];
-	Pool = $pkg.Pool = $newType(0, $kindStruct, "sync.Pool", "Pool", "sync", function(local_, localSize_, store_, New_) {
+	Pool = $pkg.Pool = $newType(0, $kindStruct, "sync.Pool", true, "sync", true, function(local_, localSize_, store_, New_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.local = 0;
@@ -2485,7 +2486,7 @@ $packages["sync"] = (function() {
 		this.store = store_;
 		this.New = New_;
 	});
-	Mutex = $pkg.Mutex = $newType(0, $kindStruct, "sync.Mutex", "Mutex", "sync", function(state_, sema_) {
+	Mutex = $pkg.Mutex = $newType(0, $kindStruct, "sync.Mutex", true, "sync", true, function(state_, sema_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.state = 0;
@@ -2495,8 +2496,8 @@ $packages["sync"] = (function() {
 		this.state = state_;
 		this.sema = sema_;
 	});
-	Locker = $pkg.Locker = $newType(8, $kindInterface, "sync.Locker", "Locker", "sync", null);
-	Once = $pkg.Once = $newType(0, $kindStruct, "sync.Once", "Once", "sync", function(m_, done_) {
+	Locker = $pkg.Locker = $newType(8, $kindInterface, "sync.Locker", true, "sync", true, null);
+	Once = $pkg.Once = $newType(0, $kindStruct, "sync.Once", true, "sync", true, function(m_, done_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.m = new Mutex.ptr(0, 0);
@@ -2506,7 +2507,7 @@ $packages["sync"] = (function() {
 		this.m = m_;
 		this.done = done_;
 	});
-	poolLocal = $pkg.poolLocal = $newType(0, $kindStruct, "sync.poolLocal", "poolLocal", "sync", function(private$0_, shared_, Mutex_, pad_) {
+	poolLocal = $pkg.poolLocal = $newType(0, $kindStruct, "sync.poolLocal", true, "sync", false, function(private$0_, shared_, Mutex_, pad_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.private$0 = $ifaceNil;
@@ -2520,7 +2521,7 @@ $packages["sync"] = (function() {
 		this.Mutex = Mutex_;
 		this.pad = pad_;
 	});
-	notifyList = $pkg.notifyList = $newType(0, $kindStruct, "sync.notifyList", "notifyList", "sync", function(wait_, notify_, lock_, head_, tail_) {
+	notifyList = $pkg.notifyList = $newType(0, $kindStruct, "sync.notifyList", true, "sync", false, function(wait_, notify_, lock_, head_, tail_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.wait = 0;
@@ -2536,7 +2537,7 @@ $packages["sync"] = (function() {
 		this.head = head_;
 		this.tail = tail_;
 	});
-	RWMutex = $pkg.RWMutex = $newType(0, $kindStruct, "sync.RWMutex", "RWMutex", "sync", function(w_, writerSem_, readerSem_, readerCount_, readerWait_) {
+	RWMutex = $pkg.RWMutex = $newType(0, $kindStruct, "sync.RWMutex", true, "sync", true, function(w_, writerSem_, readerSem_, readerCount_, readerWait_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.w = new Mutex.ptr(0, 0);
@@ -2552,7 +2553,7 @@ $packages["sync"] = (function() {
 		this.readerCount = readerCount_;
 		this.readerWait = readerWait_;
 	});
-	rlocker = $pkg.rlocker = $newType(0, $kindStruct, "sync.rlocker", "rlocker", "sync", function(w_, writerSem_, readerSem_, readerCount_, readerWait_) {
+	rlocker = $pkg.rlocker = $newType(0, $kindStruct, "sync.rlocker", true, "sync", false, function(w_, writerSem_, readerSem_, readerCount_, readerWait_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.w = new Mutex.ptr(0, 0);
@@ -2949,13 +2950,13 @@ $packages["io"] = (function() {
 	var $pkg = {}, $init, errors, sync, Reader, Writer, ReaderFrom, WriterTo, ByteReader, RuneReader, RuneScanner, sliceType, errWhence, errOffset;
 	errors = $packages["errors"];
 	sync = $packages["sync"];
-	Reader = $pkg.Reader = $newType(8, $kindInterface, "io.Reader", "Reader", "io", null);
-	Writer = $pkg.Writer = $newType(8, $kindInterface, "io.Writer", "Writer", "io", null);
-	ReaderFrom = $pkg.ReaderFrom = $newType(8, $kindInterface, "io.ReaderFrom", "ReaderFrom", "io", null);
-	WriterTo = $pkg.WriterTo = $newType(8, $kindInterface, "io.WriterTo", "WriterTo", "io", null);
-	ByteReader = $pkg.ByteReader = $newType(8, $kindInterface, "io.ByteReader", "ByteReader", "io", null);
-	RuneReader = $pkg.RuneReader = $newType(8, $kindInterface, "io.RuneReader", "RuneReader", "io", null);
-	RuneScanner = $pkg.RuneScanner = $newType(8, $kindInterface, "io.RuneScanner", "RuneScanner", "io", null);
+	Reader = $pkg.Reader = $newType(8, $kindInterface, "io.Reader", true, "io", true, null);
+	Writer = $pkg.Writer = $newType(8, $kindInterface, "io.Writer", true, "io", true, null);
+	ReaderFrom = $pkg.ReaderFrom = $newType(8, $kindInterface, "io.ReaderFrom", true, "io", true, null);
+	WriterTo = $pkg.WriterTo = $newType(8, $kindInterface, "io.WriterTo", true, "io", true, null);
+	ByteReader = $pkg.ByteReader = $newType(8, $kindInterface, "io.ByteReader", true, "io", true, null);
+	RuneReader = $pkg.RuneReader = $newType(8, $kindInterface, "io.RuneReader", true, "io", true, null);
+	RuneScanner = $pkg.RuneScanner = $newType(8, $kindInterface, "io.RuneScanner", true, "io", true, null);
 	sliceType = $sliceType($Uint8);
 	Reader.init([{prop: "Read", name: "Read", pkg: "", typ: $funcType([sliceType], [$Int, $error], false)}]);
 	Writer.init([{prop: "Write", name: "Write", pkg: "", typ: $funcType([sliceType], [$Int, $error], false)}]);
@@ -2984,7 +2985,7 @@ $packages["io"] = (function() {
 })();
 $packages["unicode"] = (function() {
 	var $pkg = {}, $init, RangeTable, Range16, Range32, CaseRange, d, foldPair, arrayType, sliceType, sliceType$1, ptrType, sliceType$2, sliceType$3, sliceType$4, _C, _Cc, _Cf, _Co, _Cs, _L, _Ll, _Lm, _Lo, _Lt, _Lu, _M, _Mc, _Me, _Mn, _N, _Nd, _Nl, _No, _P, _Pc, _Pd, _Pe, _Pf, _Pi, _Po, _Ps, _S, _Sc, _Sk, _Sm, _So, _Z, _Zl, _Zp, _Zs, _Adlam, _Ahom, _Anatolian_Hieroglyphs, _Arabic, _Armenian, _Avestan, _Balinese, _Bamum, _Bassa_Vah, _Batak, _Bengali, _Bhaiksuki, _Bopomofo, _Brahmi, _Braille, _Buginese, _Buhid, _Canadian_Aboriginal, _Carian, _Caucasian_Albanian, _Chakma, _Cham, _Cherokee, _Common, _Coptic, _Cuneiform, _Cypriot, _Cyrillic, _Deseret, _Devanagari, _Duployan, _Egyptian_Hieroglyphs, _Elbasan, _Ethiopic, _Georgian, _Glagolitic, _Gothic, _Grantha, _Greek, _Gujarati, _Gurmukhi, _Han, _Hangul, _Hanunoo, _Hatran, _Hebrew, _Hiragana, _Imperial_Aramaic, _Inherited, _Inscriptional_Pahlavi, _Inscriptional_Parthian, _Javanese, _Kaithi, _Kannada, _Katakana, _Kayah_Li, _Kharoshthi, _Khmer, _Khojki, _Khudawadi, _Lao, _Latin, _Lepcha, _Limbu, _Linear_A, _Linear_B, _Lisu, _Lycian, _Lydian, _Mahajani, _Malayalam, _Mandaic, _Manichaean, _Marchen, _Meetei_Mayek, _Mende_Kikakui, _Meroitic_Cursive, _Meroitic_Hieroglyphs, _Miao, _Modi, _Mongolian, _Mro, _Multani, _Myanmar, _Nabataean, _New_Tai_Lue, _Newa, _Nko, _Ogham, _Ol_Chiki, _Old_Hungarian, _Old_Italic, _Old_North_Arabian, _Old_Permic, _Old_Persian, _Old_South_Arabian, _Old_Turkic, _Oriya, _Osage, _Osmanya, _Pahawh_Hmong, _Palmyrene, _Pau_Cin_Hau, _Phags_Pa, _Phoenician, _Psalter_Pahlavi, _Rejang, _Runic, _Samaritan, _Saurashtra, _Sharada, _Shavian, _Siddham, _SignWriting, _Sinhala, _Sora_Sompeng, _Sundanese, _Syloti_Nagri, _Syriac, _Tagalog, _Tagbanwa, _Tai_Le, _Tai_Tham, _Tai_Viet, _Takri, _Tamil, _Tangut, _Telugu, _Thaana, _Thai, _Tibetan, _Tifinagh, _Tirhuta, _Ugaritic, _Vai, _Warang_Citi, _Yi, _White_Space, _CaseRanges, properties, asciiFold, caseOrbit, foldCommon, foldGreek, foldInherited, foldL, foldLl, foldLt, foldLu, foldM, foldMn, to, IsDigit, IsPrint, In, IsLetter, IsSpace, is16, is32, Is, isExcludingLatin, To, ToUpper, ToLower, SimpleFold;
-	RangeTable = $pkg.RangeTable = $newType(0, $kindStruct, "unicode.RangeTable", "RangeTable", "unicode", function(R16_, R32_, LatinOffset_) {
+	RangeTable = $pkg.RangeTable = $newType(0, $kindStruct, "unicode.RangeTable", true, "unicode", true, function(R16_, R32_, LatinOffset_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.R16 = sliceType.nil;
@@ -2996,7 +2997,7 @@ $packages["unicode"] = (function() {
 		this.R32 = R32_;
 		this.LatinOffset = LatinOffset_;
 	});
-	Range16 = $pkg.Range16 = $newType(0, $kindStruct, "unicode.Range16", "Range16", "unicode", function(Lo_, Hi_, Stride_) {
+	Range16 = $pkg.Range16 = $newType(0, $kindStruct, "unicode.Range16", true, "unicode", true, function(Lo_, Hi_, Stride_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Lo = 0;
@@ -3008,7 +3009,7 @@ $packages["unicode"] = (function() {
 		this.Hi = Hi_;
 		this.Stride = Stride_;
 	});
-	Range32 = $pkg.Range32 = $newType(0, $kindStruct, "unicode.Range32", "Range32", "unicode", function(Lo_, Hi_, Stride_) {
+	Range32 = $pkg.Range32 = $newType(0, $kindStruct, "unicode.Range32", true, "unicode", true, function(Lo_, Hi_, Stride_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Lo = 0;
@@ -3020,7 +3021,7 @@ $packages["unicode"] = (function() {
 		this.Hi = Hi_;
 		this.Stride = Stride_;
 	});
-	CaseRange = $pkg.CaseRange = $newType(0, $kindStruct, "unicode.CaseRange", "CaseRange", "unicode", function(Lo_, Hi_, Delta_) {
+	CaseRange = $pkg.CaseRange = $newType(0, $kindStruct, "unicode.CaseRange", true, "unicode", true, function(Lo_, Hi_, Delta_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Lo = 0;
@@ -3032,8 +3033,8 @@ $packages["unicode"] = (function() {
 		this.Hi = Hi_;
 		this.Delta = Delta_;
 	});
-	d = $pkg.d = $newType(12, $kindArray, "unicode.d", "d", "unicode", null);
-	foldPair = $pkg.foldPair = $newType(0, $kindStruct, "unicode.foldPair", "foldPair", "unicode", function(From_, To_) {
+	d = $pkg.d = $newType(12, $kindArray, "unicode.d", true, "unicode", false, null);
+	foldPair = $pkg.foldPair = $newType(0, $kindStruct, "unicode.foldPair", true, "unicode", false, function(From_, To_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.From = 0;
@@ -3663,7 +3664,7 @@ $packages["unicode"] = (function() {
 })();
 $packages["unicode/utf8"] = (function() {
 	var $pkg = {}, $init, acceptRange, first, acceptRanges, FullRune, DecodeRune, DecodeRuneInString, DecodeLastRune, DecodeLastRuneInString, RuneLen, EncodeRune, RuneCount, RuneCountInString, RuneStart, ValidRune;
-	acceptRange = $pkg.acceptRange = $newType(0, $kindStruct, "utf8.acceptRange", "acceptRange", "unicode/utf8", function(lo_, hi_) {
+	acceptRange = $pkg.acceptRange = $newType(0, $kindStruct, "utf8.acceptRange", true, "unicode/utf8", false, function(lo_, hi_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.lo = 0;
@@ -4129,7 +4130,7 @@ $packages["bytes"] = (function() {
 	io = $packages["io"];
 	unicode = $packages["unicode"];
 	utf8 = $packages["unicode/utf8"];
-	Buffer = $pkg.Buffer = $newType(0, $kindStruct, "bytes.Buffer", "Buffer", "bytes", function(buf_, off_, runeBytes_, bootstrap_, lastRead_) {
+	Buffer = $pkg.Buffer = $newType(0, $kindStruct, "bytes.Buffer", true, "bytes", true, function(buf_, off_, runeBytes_, bootstrap_, lastRead_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.buf = sliceType.nil;
@@ -4145,7 +4146,7 @@ $packages["bytes"] = (function() {
 		this.bootstrap = bootstrap_;
 		this.lastRead = lastRead_;
 	});
-	readOp = $pkg.readOp = $newType(4, $kindInt, "bytes.readOp", "readOp", "bytes", null);
+	readOp = $pkg.readOp = $newType(4, $kindInt, "bytes.readOp", true, "bytes", false, null);
 	ptrType = $ptrType(Buffer);
 	sliceType = $sliceType($Uint8);
 	arrayType = $arrayType($Uint8, 4);
@@ -4882,7 +4883,7 @@ $packages["bufio"] = (function() {
 	errors = $packages["errors"];
 	io = $packages["io"];
 	utf8 = $packages["unicode/utf8"];
-	Reader = $pkg.Reader = $newType(0, $kindStruct, "bufio.Reader", "Reader", "bufio", function(buf_, rd_, r_, w_, err_, lastByte_, lastRuneSize_) {
+	Reader = $pkg.Reader = $newType(0, $kindStruct, "bufio.Reader", true, "bufio", true, function(buf_, rd_, r_, w_, err_, lastByte_, lastRuneSize_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.buf = sliceType.nil;
@@ -4902,7 +4903,7 @@ $packages["bufio"] = (function() {
 		this.lastByte = lastByte_;
 		this.lastRuneSize = lastRuneSize_;
 	});
-	Writer = $pkg.Writer = $newType(0, $kindStruct, "bufio.Writer", "Writer", "bufio", function(err_, buf_, n_, wr_) {
+	Writer = $pkg.Writer = $newType(0, $kindStruct, "bufio.Writer", true, "bufio", true, function(err_, buf_, n_, wr_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.err = $ifaceNil;
@@ -5798,8 +5799,8 @@ $packages["bufio"] = (function() {
 })();
 $packages["encoding"] = (function() {
 	var $pkg = {}, $init, TextMarshaler, TextUnmarshaler, sliceType;
-	TextMarshaler = $pkg.TextMarshaler = $newType(8, $kindInterface, "encoding.TextMarshaler", "TextMarshaler", "encoding", null);
-	TextUnmarshaler = $pkg.TextUnmarshaler = $newType(8, $kindInterface, "encoding.TextUnmarshaler", "TextUnmarshaler", "encoding", null);
+	TextMarshaler = $pkg.TextMarshaler = $newType(8, $kindInterface, "encoding.TextMarshaler", true, "encoding", true, null);
+	TextUnmarshaler = $pkg.TextUnmarshaler = $newType(8, $kindInterface, "encoding.TextUnmarshaler", true, "encoding", true, null);
 	sliceType = $sliceType($Uint8);
 	TextMarshaler.init([{prop: "MarshalText", name: "MarshalText", pkg: "", typ: $funcType([], [sliceType, $error], false)}]);
 	TextUnmarshaler.init([{prop: "UnmarshalText", name: "UnmarshalText", pkg: "", typ: $funcType([sliceType], [$error], false)}]);
@@ -5902,7 +5903,7 @@ $packages["syscall"] = (function() {
 	race = $packages["internal/race"];
 	runtime = $packages["runtime"];
 	sync = $packages["sync"];
-	mmapper = $pkg.mmapper = $newType(0, $kindStruct, "syscall.mmapper", "mmapper", "syscall", function(Mutex_, active_, mmap_, munmap_) {
+	mmapper = $pkg.mmapper = $newType(0, $kindStruct, "syscall.mmapper", true, "syscall", false, function(Mutex_, active_, mmap_, munmap_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Mutex = new sync.Mutex.ptr(0, 0);
@@ -5916,9 +5917,9 @@ $packages["syscall"] = (function() {
 		this.mmap = mmap_;
 		this.munmap = munmap_;
 	});
-	Errno = $pkg.Errno = $newType(4, $kindUintptr, "syscall.Errno", "Errno", "syscall", null);
-	_C_int = $pkg._C_int = $newType(4, $kindInt32, "syscall._C_int", "_C_int", "syscall", null);
-	Timespec = $pkg.Timespec = $newType(0, $kindStruct, "syscall.Timespec", "Timespec", "syscall", function(Sec_, Nsec_) {
+	Errno = $pkg.Errno = $newType(4, $kindUintptr, "syscall.Errno", true, "syscall", true, null);
+	_C_int = $pkg._C_int = $newType(4, $kindInt32, "syscall._C_int", true, "syscall", false, null);
+	Timespec = $pkg.Timespec = $newType(0, $kindStruct, "syscall.Timespec", true, "syscall", true, function(Sec_, Nsec_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Sec = new $Int64(0, 0);
@@ -5928,7 +5929,7 @@ $packages["syscall"] = (function() {
 		this.Sec = Sec_;
 		this.Nsec = Nsec_;
 	});
-	Stat_t = $pkg.Stat_t = $newType(0, $kindStruct, "syscall.Stat_t", "Stat_t", "syscall", function(Dev_, Mode_, Nlink_, Ino_, Uid_, Gid_, Rdev_, Pad_cgo_0_, Atimespec_, Mtimespec_, Ctimespec_, Birthtimespec_, Size_, Blocks_, Blksize_, Flags_, Gen_, Lspare_, Qspare_) {
+	Stat_t = $pkg.Stat_t = $newType(0, $kindStruct, "syscall.Stat_t", true, "syscall", true, function(Dev_, Mode_, Nlink_, Ino_, Uid_, Gid_, Rdev_, Pad_cgo_0_, Atimespec_, Mtimespec_, Ctimespec_, Birthtimespec_, Size_, Blocks_, Blksize_, Flags_, Gen_, Lspare_, Qspare_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Dev = 0;
@@ -5972,7 +5973,7 @@ $packages["syscall"] = (function() {
 		this.Lspare = Lspare_;
 		this.Qspare = Qspare_;
 	});
-	Dirent = $pkg.Dirent = $newType(0, $kindStruct, "syscall.Dirent", "Dirent", "syscall", function(Ino_, Seekoff_, Reclen_, Namlen_, Type_, Name_, Pad_cgo_0_) {
+	Dirent = $pkg.Dirent = $newType(0, $kindStruct, "syscall.Dirent", true, "syscall", true, function(Ino_, Seekoff_, Reclen_, Namlen_, Type_, Name_, Pad_cgo_0_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Ino = new $Uint64(0, 0);
@@ -6907,7 +6908,7 @@ $packages["syscall"] = (function() {
 })();
 $packages["github.com/gopherjs/gopherjs/nosync"] = (function() {
 	var $pkg = {}, $init, Mutex, Once, ptrType, funcType, ptrType$3;
-	Mutex = $pkg.Mutex = $newType(0, $kindStruct, "nosync.Mutex", "Mutex", "github.com/gopherjs/gopherjs/nosync", function(locked_) {
+	Mutex = $pkg.Mutex = $newType(0, $kindStruct, "nosync.Mutex", true, "github.com/gopherjs/gopherjs/nosync", true, function(locked_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.locked = false;
@@ -6915,7 +6916,7 @@ $packages["github.com/gopherjs/gopherjs/nosync"] = (function() {
 		}
 		this.locked = locked_;
 	});
-	Once = $pkg.Once = $newType(0, $kindStruct, "nosync.Once", "Once", "github.com/gopherjs/gopherjs/nosync", function(doing_, done_) {
+	Once = $pkg.Once = $newType(0, $kindStruct, "nosync.Once", true, "github.com/gopherjs/gopherjs/nosync", true, function(doing_, done_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.doing = false;
@@ -6986,7 +6987,7 @@ $packages["time"] = (function() {
 	nosync = $packages["github.com/gopherjs/gopherjs/nosync"];
 	runtime = $packages["runtime"];
 	syscall = $packages["syscall"];
-	ParseError = $pkg.ParseError = $newType(0, $kindStruct, "time.ParseError", "ParseError", "time", function(Layout_, Value_, LayoutElem_, ValueElem_, Message_) {
+	ParseError = $pkg.ParseError = $newType(0, $kindStruct, "time.ParseError", true, "time", true, function(Layout_, Value_, LayoutElem_, ValueElem_, Message_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Layout = "";
@@ -7002,7 +7003,7 @@ $packages["time"] = (function() {
 		this.ValueElem = ValueElem_;
 		this.Message = Message_;
 	});
-	Time = $pkg.Time = $newType(0, $kindStruct, "time.Time", "Time", "time", function(sec_, nsec_, loc_) {
+	Time = $pkg.Time = $newType(0, $kindStruct, "time.Time", true, "time", true, function(sec_, nsec_, loc_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.sec = new $Int64(0, 0);
@@ -7014,10 +7015,10 @@ $packages["time"] = (function() {
 		this.nsec = nsec_;
 		this.loc = loc_;
 	});
-	Month = $pkg.Month = $newType(4, $kindInt, "time.Month", "Month", "time", null);
-	Weekday = $pkg.Weekday = $newType(4, $kindInt, "time.Weekday", "Weekday", "time", null);
-	Duration = $pkg.Duration = $newType(8, $kindInt64, "time.Duration", "Duration", "time", null);
-	Location = $pkg.Location = $newType(0, $kindStruct, "time.Location", "Location", "time", function(name_, zone_, tx_, cacheStart_, cacheEnd_, cacheZone_) {
+	Month = $pkg.Month = $newType(4, $kindInt, "time.Month", true, "time", true, null);
+	Weekday = $pkg.Weekday = $newType(4, $kindInt, "time.Weekday", true, "time", true, null);
+	Duration = $pkg.Duration = $newType(8, $kindInt64, "time.Duration", true, "time", true, null);
+	Location = $pkg.Location = $newType(0, $kindStruct, "time.Location", true, "time", true, function(name_, zone_, tx_, cacheStart_, cacheEnd_, cacheZone_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.name = "";
@@ -7035,7 +7036,7 @@ $packages["time"] = (function() {
 		this.cacheEnd = cacheEnd_;
 		this.cacheZone = cacheZone_;
 	});
-	zone = $pkg.zone = $newType(0, $kindStruct, "time.zone", "zone", "time", function(name_, offset_, isDST_) {
+	zone = $pkg.zone = $newType(0, $kindStruct, "time.zone", true, "time", false, function(name_, offset_, isDST_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.name = "";
@@ -7047,7 +7048,7 @@ $packages["time"] = (function() {
 		this.offset = offset_;
 		this.isDST = isDST_;
 	});
-	zoneTrans = $pkg.zoneTrans = $newType(0, $kindStruct, "time.zoneTrans", "zoneTrans", "time", function(when_, index_, isstd_, isutc_) {
+	zoneTrans = $pkg.zoneTrans = $newType(0, $kindStruct, "time.zoneTrans", true, "time", false, function(when_, index_, isstd_, isutc_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.when = new $Int64(0, 0);
@@ -9588,7 +9589,7 @@ $packages["os"] = (function() {
 	atomic = $packages["sync/atomic"];
 	syscall = $packages["syscall"];
 	time = $packages["time"];
-	PathError = $pkg.PathError = $newType(0, $kindStruct, "os.PathError", "PathError", "os", function(Op_, Path_, Err_) {
+	PathError = $pkg.PathError = $newType(0, $kindStruct, "os.PathError", true, "os", true, function(Op_, Path_, Err_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Op = "";
@@ -9600,7 +9601,7 @@ $packages["os"] = (function() {
 		this.Path = Path_;
 		this.Err = Err_;
 	});
-	SyscallError = $pkg.SyscallError = $newType(0, $kindStruct, "os.SyscallError", "SyscallError", "os", function(Syscall_, Err_) {
+	SyscallError = $pkg.SyscallError = $newType(0, $kindStruct, "os.SyscallError", true, "os", true, function(Syscall_, Err_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Syscall = "";
@@ -9610,7 +9611,7 @@ $packages["os"] = (function() {
 		this.Syscall = Syscall_;
 		this.Err = Err_;
 	});
-	LinkError = $pkg.LinkError = $newType(0, $kindStruct, "os.LinkError", "LinkError", "os", function(Op_, Old_, New_, Err_) {
+	LinkError = $pkg.LinkError = $newType(0, $kindStruct, "os.LinkError", true, "os", true, function(Op_, Old_, New_, Err_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Op = "";
@@ -9624,7 +9625,7 @@ $packages["os"] = (function() {
 		this.New = New_;
 		this.Err = Err_;
 	});
-	File = $pkg.File = $newType(0, $kindStruct, "os.File", "File", "os", function(file_) {
+	File = $pkg.File = $newType(0, $kindStruct, "os.File", true, "os", true, function(file_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.file = ptrType$12.nil;
@@ -9632,7 +9633,7 @@ $packages["os"] = (function() {
 		}
 		this.file = file_;
 	});
-	file = $pkg.file = $newType(0, $kindStruct, "os.file", "file", "os", function(fd_, name_, dirinfo_) {
+	file = $pkg.file = $newType(0, $kindStruct, "os.file", true, "os", false, function(fd_, name_, dirinfo_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.fd = 0;
@@ -9644,7 +9645,7 @@ $packages["os"] = (function() {
 		this.name = name_;
 		this.dirinfo = dirinfo_;
 	});
-	dirInfo = $pkg.dirInfo = $newType(0, $kindStruct, "os.dirInfo", "dirInfo", "os", function(buf_, nbuf_, bufp_) {
+	dirInfo = $pkg.dirInfo = $newType(0, $kindStruct, "os.dirInfo", true, "os", false, function(buf_, nbuf_, bufp_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.buf = sliceType$1.nil;
@@ -9656,9 +9657,9 @@ $packages["os"] = (function() {
 		this.nbuf = nbuf_;
 		this.bufp = bufp_;
 	});
-	FileInfo = $pkg.FileInfo = $newType(8, $kindInterface, "os.FileInfo", "FileInfo", "os", null);
-	FileMode = $pkg.FileMode = $newType(4, $kindUint32, "os.FileMode", "FileMode", "os", null);
-	fileStat = $pkg.fileStat = $newType(0, $kindStruct, "os.fileStat", "fileStat", "os", function(name_, size_, mode_, modTime_, sys_) {
+	FileInfo = $pkg.FileInfo = $newType(8, $kindInterface, "os.FileInfo", true, "os", true, null);
+	FileMode = $pkg.FileMode = $newType(4, $kindUint32, "os.FileMode", true, "os", true, null);
+	fileStat = $pkg.fileStat = $newType(0, $kindStruct, "os.fileStat", true, "os", false, function(name_, size_, mode_, modTime_, sys_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.name = "";
@@ -10589,7 +10590,7 @@ $packages["strconv"] = (function() {
 	errors = $packages["errors"];
 	math = $packages["math"];
 	utf8 = $packages["unicode/utf8"];
-	NumError = $pkg.NumError = $newType(0, $kindStruct, "strconv.NumError", "NumError", "strconv", function(Func_, Num_, Err_) {
+	NumError = $pkg.NumError = $newType(0, $kindStruct, "strconv.NumError", true, "strconv", true, function(Func_, Num_, Err_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Func = "";
@@ -10601,7 +10602,7 @@ $packages["strconv"] = (function() {
 		this.Num = Num_;
 		this.Err = Err_;
 	});
-	decimal = $pkg.decimal = $newType(0, $kindStruct, "strconv.decimal", "decimal", "strconv", function(d_, nd_, dp_, neg_, trunc_) {
+	decimal = $pkg.decimal = $newType(0, $kindStruct, "strconv.decimal", true, "strconv", false, function(d_, nd_, dp_, neg_, trunc_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.d = arrayType.zero();
@@ -10617,7 +10618,7 @@ $packages["strconv"] = (function() {
 		this.neg = neg_;
 		this.trunc = trunc_;
 	});
-	leftCheat = $pkg.leftCheat = $newType(0, $kindStruct, "strconv.leftCheat", "leftCheat", "strconv", function(delta_, cutoff_) {
+	leftCheat = $pkg.leftCheat = $newType(0, $kindStruct, "strconv.leftCheat", true, "strconv", false, function(delta_, cutoff_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.delta = 0;
@@ -10627,7 +10628,7 @@ $packages["strconv"] = (function() {
 		this.delta = delta_;
 		this.cutoff = cutoff_;
 	});
-	extFloat = $pkg.extFloat = $newType(0, $kindStruct, "strconv.extFloat", "extFloat", "strconv", function(mant_, exp_, neg_) {
+	extFloat = $pkg.extFloat = $newType(0, $kindStruct, "strconv.extFloat", true, "strconv", false, function(mant_, exp_, neg_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.mant = new $Uint64(0, 0);
@@ -10639,7 +10640,7 @@ $packages["strconv"] = (function() {
 		this.exp = exp_;
 		this.neg = neg_;
 	});
-	floatInfo = $pkg.floatInfo = $newType(0, $kindStruct, "strconv.floatInfo", "floatInfo", "strconv", function(mantbits_, expbits_, bias_) {
+	floatInfo = $pkg.floatInfo = $newType(0, $kindStruct, "strconv.floatInfo", true, "strconv", false, function(mantbits_, expbits_, bias_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.mantbits = 0;
@@ -10651,7 +10652,7 @@ $packages["strconv"] = (function() {
 		this.expbits = expbits_;
 		this.bias = bias_;
 	});
-	decimalSlice = $pkg.decimalSlice = $newType(0, $kindStruct, "strconv.decimalSlice", "decimalSlice", "strconv", function(d_, nd_, dp_, neg_) {
+	decimalSlice = $pkg.decimalSlice = $newType(0, $kindStruct, "strconv.decimalSlice", true, "strconv", false, function(d_, nd_, dp_, neg_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.d = sliceType$6.nil;
@@ -13197,14 +13198,14 @@ $packages["strconv"] = (function() {
 	return $pkg;
 })();
 $packages["reflect"] = (function() {
-	var $pkg = {}, $init, errors, js, math, runtime, strconv, sync, uncommonType, funcType, name, nameData, mapIter, Type, Kind, tflag, rtype, typeAlg, method, ChanDir, arrayType, chanType, imethod, interfaceType, mapType, ptrType, sliceType, structField, structType, Method, nameOff, typeOff, textOff, StructField, StructTag, fieldScan, Value, flag, ValueError, nonEmptyInterface, sliceType$1, ptrType$1, sliceType$2, sliceType$3, mapType$1, structType$1, sliceType$5, ptrType$3, funcType$1, sliceType$6, ptrType$4, ptrType$5, sliceType$7, sliceType$8, ptrType$6, ptrType$7, structType$8, sliceType$9, sliceType$10, ptrType$8, arrayType$1, structType$9, ptrType$9, sliceType$11, sliceType$12, ptrType$10, ptrType$11, sliceType$14, sliceType$15, ptrType$12, sliceType$16, ptrType$17, sliceType$18, ptrType$18, funcType$3, funcType$4, funcType$5, arrayType$13, ptrType$19, initialized, uncommonTypeMap, nameMap, nameOffList, typeOffList, callHelper, jsObjectPtr, selectHelper, kindNames, methodCache, uint8Type, init, jsType, reflectType, setKindType, newName, newNameOff, newTypeOff, internalStr, isWrapped, copyStruct, makeValue, MakeSlice, TypeOf, ValueOf, FuncOf, SliceOf, Zero, unsafe_New, makeInt, typedmemmove, keyFor, mapaccess, mapassign, mapdelete, mapiterinit, mapiterkey, mapiternext, maplen, cvtDirect, Copy, methodReceiver, valueInterface, ifaceE2I, methodName, makeMethodValue, wrapJsObject, unwrapJsObject, getJsTag, chanrecv, chansend, PtrTo, implements$1, directlyAssignable, haveIdenticalUnderlyingType, toType, ifaceIndir, overflowFloat32, typesMustMatch, New, convertOp, makeFloat, makeComplex, makeString, makeBytes, makeRunes, cvtInt, cvtUint, cvtFloatInt, cvtFloatUint, cvtIntFloat, cvtUintFloat, cvtFloat, cvtComplex, cvtIntString, cvtUintString, cvtBytesString, cvtStringBytes, cvtRunesString, cvtStringRunes, cvtT2I, cvtI2I;
+	var $pkg = {}, $init, errors, js, math, runtime, strconv, sync, uncommonType, funcType, name, nameData, mapIter, Type, Kind, tflag, rtype, typeAlg, method, ChanDir, arrayType, chanType, imethod, interfaceType, mapType, ptrType, sliceType, structField, structType, Method, nameOff, typeOff, textOff, StructField, StructTag, fieldScan, Value, flag, ValueError, sliceType$1, ptrType$1, sliceType$2, sliceType$3, mapType$1, structType$1, sliceType$5, ptrType$3, funcType$1, sliceType$6, ptrType$4, ptrType$5, sliceType$7, sliceType$8, ptrType$6, ptrType$7, structType$8, sliceType$9, sliceType$10, sliceType$11, sliceType$12, ptrType$8, ptrType$9, sliceType$14, sliceType$15, ptrType$10, sliceType$16, ptrType$16, sliceType$18, ptrType$17, funcType$3, funcType$4, funcType$5, arrayType$12, ptrType$18, initialized, uncommonTypeMap, nameMap, nameOffList, typeOffList, callHelper, jsObjectPtr, selectHelper, kindNames, methodCache, uint8Type, init, jsType, reflectType, setKindType, newName, newNameOff, newTypeOff, internalStr, isWrapped, copyStruct, makeValue, MakeSlice, TypeOf, ValueOf, FuncOf, SliceOf, Zero, unsafe_New, makeInt, typedmemmove, keyFor, mapaccess, mapassign, mapdelete, mapiterinit, mapiterkey, mapiternext, maplen, cvtDirect, Copy, methodReceiver, valueInterface, ifaceE2I, methodName, makeMethodValue, wrapJsObject, unwrapJsObject, getJsTag, chanrecv, chansend, PtrTo, implements$1, directlyAssignable, haveIdenticalUnderlyingType, toType, ifaceIndir, overflowFloat32, typesMustMatch, New, convertOp, makeFloat, makeComplex, makeString, makeBytes, makeRunes, cvtInt, cvtUint, cvtFloatInt, cvtFloatUint, cvtIntFloat, cvtUintFloat, cvtFloat, cvtComplex, cvtIntString, cvtUintString, cvtBytesString, cvtStringBytes, cvtRunesString, cvtStringRunes, cvtT2I, cvtI2I;
 	errors = $packages["errors"];
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	math = $packages["math"];
 	runtime = $packages["runtime"];
 	strconv = $packages["strconv"];
 	sync = $packages["sync"];
-	uncommonType = $pkg.uncommonType = $newType(0, $kindStruct, "reflect.uncommonType", "uncommonType", "reflect", function(pkgPath_, mcount_, _$2_, moff_, _$4_, _methods_) {
+	uncommonType = $pkg.uncommonType = $newType(0, $kindStruct, "reflect.uncommonType", true, "reflect", false, function(pkgPath_, mcount_, _$2_, moff_, _$4_, _methods_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.pkgPath = 0;
@@ -13222,7 +13223,7 @@ $packages["reflect"] = (function() {
 		this._$4 = _$4_;
 		this._methods = _methods_;
 	});
-	funcType = $pkg.funcType = $newType(0, $kindStruct, "reflect.funcType", "funcType", "reflect", function(rtype_, inCount_, outCount_, _in_, _out_) {
+	funcType = $pkg.funcType = $newType(0, $kindStruct, "reflect.funcType", true, "reflect", false, function(rtype_, inCount_, outCount_, _in_, _out_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.rtype = new rtype.ptr(0, 0, 0, 0, 0, 0, 0, ptrType$4.nil, ptrType$5.nil, 0, 0);
@@ -13238,7 +13239,7 @@ $packages["reflect"] = (function() {
 		this._in = _in_;
 		this._out = _out_;
 	});
-	name = $pkg.name = $newType(0, $kindStruct, "reflect.name", "name", "reflect", function(bytes_) {
+	name = $pkg.name = $newType(0, $kindStruct, "reflect.name", true, "reflect", false, function(bytes_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.bytes = ptrType$5.nil;
@@ -13246,7 +13247,7 @@ $packages["reflect"] = (function() {
 		}
 		this.bytes = bytes_;
 	});
-	nameData = $pkg.nameData = $newType(0, $kindStruct, "reflect.nameData", "nameData", "reflect", function(name_, tag_, pkgPath_, exported_) {
+	nameData = $pkg.nameData = $newType(0, $kindStruct, "reflect.nameData", true, "reflect", false, function(name_, tag_, pkgPath_, exported_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.name = "";
@@ -13260,7 +13261,7 @@ $packages["reflect"] = (function() {
 		this.pkgPath = pkgPath_;
 		this.exported = exported_;
 	});
-	mapIter = $pkg.mapIter = $newType(0, $kindStruct, "reflect.mapIter", "mapIter", "reflect", function(t_, m_, keys_, i_) {
+	mapIter = $pkg.mapIter = $newType(0, $kindStruct, "reflect.mapIter", true, "reflect", false, function(t_, m_, keys_, i_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.t = $ifaceNil;
@@ -13274,10 +13275,10 @@ $packages["reflect"] = (function() {
 		this.keys = keys_;
 		this.i = i_;
 	});
-	Type = $pkg.Type = $newType(8, $kindInterface, "reflect.Type", "Type", "reflect", null);
-	Kind = $pkg.Kind = $newType(4, $kindUint, "reflect.Kind", "Kind", "reflect", null);
-	tflag = $pkg.tflag = $newType(1, $kindUint8, "reflect.tflag", "tflag", "reflect", null);
-	rtype = $pkg.rtype = $newType(0, $kindStruct, "reflect.rtype", "rtype", "reflect", function(size_, ptrdata_, hash_, tflag_, align_, fieldAlign_, kind_, alg_, gcdata_, str_, ptrToThis_) {
+	Type = $pkg.Type = $newType(8, $kindInterface, "reflect.Type", true, "reflect", true, null);
+	Kind = $pkg.Kind = $newType(4, $kindUint, "reflect.Kind", true, "reflect", true, null);
+	tflag = $pkg.tflag = $newType(1, $kindUint8, "reflect.tflag", true, "reflect", false, null);
+	rtype = $pkg.rtype = $newType(0, $kindStruct, "reflect.rtype", true, "reflect", false, function(size_, ptrdata_, hash_, tflag_, align_, fieldAlign_, kind_, alg_, gcdata_, str_, ptrToThis_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.size = 0;
@@ -13305,7 +13306,7 @@ $packages["reflect"] = (function() {
 		this.str = str_;
 		this.ptrToThis = ptrToThis_;
 	});
-	typeAlg = $pkg.typeAlg = $newType(0, $kindStruct, "reflect.typeAlg", "typeAlg", "reflect", function(hash_, equal_) {
+	typeAlg = $pkg.typeAlg = $newType(0, $kindStruct, "reflect.typeAlg", true, "reflect", false, function(hash_, equal_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.hash = $throwNilPointerError;
@@ -13315,7 +13316,7 @@ $packages["reflect"] = (function() {
 		this.hash = hash_;
 		this.equal = equal_;
 	});
-	method = $pkg.method = $newType(0, $kindStruct, "reflect.method", "method", "reflect", function(name_, mtyp_, ifn_, tfn_) {
+	method = $pkg.method = $newType(0, $kindStruct, "reflect.method", true, "reflect", false, function(name_, mtyp_, ifn_, tfn_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.name = 0;
@@ -13329,8 +13330,8 @@ $packages["reflect"] = (function() {
 		this.ifn = ifn_;
 		this.tfn = tfn_;
 	});
-	ChanDir = $pkg.ChanDir = $newType(4, $kindInt, "reflect.ChanDir", "ChanDir", "reflect", null);
-	arrayType = $pkg.arrayType = $newType(0, $kindStruct, "reflect.arrayType", "arrayType", "reflect", function(rtype_, elem_, slice_, len_) {
+	ChanDir = $pkg.ChanDir = $newType(4, $kindInt, "reflect.ChanDir", true, "reflect", true, null);
+	arrayType = $pkg.arrayType = $newType(0, $kindStruct, "reflect.arrayType", true, "reflect", false, function(rtype_, elem_, slice_, len_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.rtype = new rtype.ptr(0, 0, 0, 0, 0, 0, 0, ptrType$4.nil, ptrType$5.nil, 0, 0);
@@ -13344,7 +13345,7 @@ $packages["reflect"] = (function() {
 		this.slice = slice_;
 		this.len = len_;
 	});
-	chanType = $pkg.chanType = $newType(0, $kindStruct, "reflect.chanType", "chanType", "reflect", function(rtype_, elem_, dir_) {
+	chanType = $pkg.chanType = $newType(0, $kindStruct, "reflect.chanType", true, "reflect", false, function(rtype_, elem_, dir_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.rtype = new rtype.ptr(0, 0, 0, 0, 0, 0, 0, ptrType$4.nil, ptrType$5.nil, 0, 0);
@@ -13356,7 +13357,7 @@ $packages["reflect"] = (function() {
 		this.elem = elem_;
 		this.dir = dir_;
 	});
-	imethod = $pkg.imethod = $newType(0, $kindStruct, "reflect.imethod", "imethod", "reflect", function(name_, typ_) {
+	imethod = $pkg.imethod = $newType(0, $kindStruct, "reflect.imethod", true, "reflect", false, function(name_, typ_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.name = 0;
@@ -13366,7 +13367,7 @@ $packages["reflect"] = (function() {
 		this.name = name_;
 		this.typ = typ_;
 	});
-	interfaceType = $pkg.interfaceType = $newType(0, $kindStruct, "reflect.interfaceType", "interfaceType", "reflect", function(rtype_, pkgPath_, methods_) {
+	interfaceType = $pkg.interfaceType = $newType(0, $kindStruct, "reflect.interfaceType", true, "reflect", false, function(rtype_, pkgPath_, methods_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.rtype = new rtype.ptr(0, 0, 0, 0, 0, 0, 0, ptrType$4.nil, ptrType$5.nil, 0, 0);
@@ -13378,7 +13379,7 @@ $packages["reflect"] = (function() {
 		this.pkgPath = pkgPath_;
 		this.methods = methods_;
 	});
-	mapType = $pkg.mapType = $newType(0, $kindStruct, "reflect.mapType", "mapType", "reflect", function(rtype_, key_, elem_, bucket_, hmap_, keysize_, indirectkey_, valuesize_, indirectvalue_, bucketsize_, reflexivekey_, needkeyupdate_) {
+	mapType = $pkg.mapType = $newType(0, $kindStruct, "reflect.mapType", true, "reflect", false, function(rtype_, key_, elem_, bucket_, hmap_, keysize_, indirectkey_, valuesize_, indirectvalue_, bucketsize_, reflexivekey_, needkeyupdate_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.rtype = new rtype.ptr(0, 0, 0, 0, 0, 0, 0, ptrType$4.nil, ptrType$5.nil, 0, 0);
@@ -13408,7 +13409,7 @@ $packages["reflect"] = (function() {
 		this.reflexivekey = reflexivekey_;
 		this.needkeyupdate = needkeyupdate_;
 	});
-	ptrType = $pkg.ptrType = $newType(0, $kindStruct, "reflect.ptrType", "ptrType", "reflect", function(rtype_, elem_) {
+	ptrType = $pkg.ptrType = $newType(0, $kindStruct, "reflect.ptrType", true, "reflect", false, function(rtype_, elem_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.rtype = new rtype.ptr(0, 0, 0, 0, 0, 0, 0, ptrType$4.nil, ptrType$5.nil, 0, 0);
@@ -13418,7 +13419,7 @@ $packages["reflect"] = (function() {
 		this.rtype = rtype_;
 		this.elem = elem_;
 	});
-	sliceType = $pkg.sliceType = $newType(0, $kindStruct, "reflect.sliceType", "sliceType", "reflect", function(rtype_, elem_) {
+	sliceType = $pkg.sliceType = $newType(0, $kindStruct, "reflect.sliceType", true, "reflect", false, function(rtype_, elem_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.rtype = new rtype.ptr(0, 0, 0, 0, 0, 0, 0, ptrType$4.nil, ptrType$5.nil, 0, 0);
@@ -13428,7 +13429,7 @@ $packages["reflect"] = (function() {
 		this.rtype = rtype_;
 		this.elem = elem_;
 	});
-	structField = $pkg.structField = $newType(0, $kindStruct, "reflect.structField", "structField", "reflect", function(name_, typ_, offset_) {
+	structField = $pkg.structField = $newType(0, $kindStruct, "reflect.structField", true, "reflect", false, function(name_, typ_, offset_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.name = new name.ptr(ptrType$5.nil);
@@ -13440,7 +13441,7 @@ $packages["reflect"] = (function() {
 		this.typ = typ_;
 		this.offset = offset_;
 	});
-	structType = $pkg.structType = $newType(0, $kindStruct, "reflect.structType", "structType", "reflect", function(rtype_, pkgPath_, fields_) {
+	structType = $pkg.structType = $newType(0, $kindStruct, "reflect.structType", true, "reflect", false, function(rtype_, pkgPath_, fields_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.rtype = new rtype.ptr(0, 0, 0, 0, 0, 0, 0, ptrType$4.nil, ptrType$5.nil, 0, 0);
@@ -13452,7 +13453,7 @@ $packages["reflect"] = (function() {
 		this.pkgPath = pkgPath_;
 		this.fields = fields_;
 	});
-	Method = $pkg.Method = $newType(0, $kindStruct, "reflect.Method", "Method", "reflect", function(Name_, PkgPath_, Type_, Func_, Index_) {
+	Method = $pkg.Method = $newType(0, $kindStruct, "reflect.Method", true, "reflect", true, function(Name_, PkgPath_, Type_, Func_, Index_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Name = "";
@@ -13468,10 +13469,10 @@ $packages["reflect"] = (function() {
 		this.Func = Func_;
 		this.Index = Index_;
 	});
-	nameOff = $pkg.nameOff = $newType(4, $kindInt32, "reflect.nameOff", "nameOff", "reflect", null);
-	typeOff = $pkg.typeOff = $newType(4, $kindInt32, "reflect.typeOff", "typeOff", "reflect", null);
-	textOff = $pkg.textOff = $newType(4, $kindInt32, "reflect.textOff", "textOff", "reflect", null);
-	StructField = $pkg.StructField = $newType(0, $kindStruct, "reflect.StructField", "StructField", "reflect", function(Name_, PkgPath_, Type_, Tag_, Offset_, Index_, Anonymous_) {
+	nameOff = $pkg.nameOff = $newType(4, $kindInt32, "reflect.nameOff", true, "reflect", false, null);
+	typeOff = $pkg.typeOff = $newType(4, $kindInt32, "reflect.typeOff", true, "reflect", false, null);
+	textOff = $pkg.textOff = $newType(4, $kindInt32, "reflect.textOff", true, "reflect", false, null);
+	StructField = $pkg.StructField = $newType(0, $kindStruct, "reflect.StructField", true, "reflect", true, function(Name_, PkgPath_, Type_, Tag_, Offset_, Index_, Anonymous_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Name = "";
@@ -13491,18 +13492,18 @@ $packages["reflect"] = (function() {
 		this.Index = Index_;
 		this.Anonymous = Anonymous_;
 	});
-	StructTag = $pkg.StructTag = $newType(8, $kindString, "reflect.StructTag", "StructTag", "reflect", null);
-	fieldScan = $pkg.fieldScan = $newType(0, $kindStruct, "reflect.fieldScan", "fieldScan", "reflect", function(typ_, index_) {
+	StructTag = $pkg.StructTag = $newType(8, $kindString, "reflect.StructTag", true, "reflect", true, null);
+	fieldScan = $pkg.fieldScan = $newType(0, $kindStruct, "reflect.fieldScan", true, "reflect", false, function(typ_, index_) {
 		this.$val = this;
 		if (arguments.length === 0) {
-			this.typ = ptrType$12.nil;
+			this.typ = ptrType$10.nil;
 			this.index = sliceType$14.nil;
 			return;
 		}
 		this.typ = typ_;
 		this.index = index_;
 	});
-	Value = $pkg.Value = $newType(0, $kindStruct, "reflect.Value", "Value", "reflect", function(typ_, ptr_, flag_) {
+	Value = $pkg.Value = $newType(0, $kindStruct, "reflect.Value", true, "reflect", true, function(typ_, ptr_, flag_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.typ = ptrType$1.nil;
@@ -13514,8 +13515,8 @@ $packages["reflect"] = (function() {
 		this.ptr = ptr_;
 		this.flag = flag_;
 	});
-	flag = $pkg.flag = $newType(4, $kindUintptr, "reflect.flag", "flag", "reflect", null);
-	ValueError = $pkg.ValueError = $newType(0, $kindStruct, "reflect.ValueError", "ValueError", "reflect", function(Method_, Kind_) {
+	flag = $pkg.flag = $newType(4, $kindUintptr, "reflect.flag", true, "reflect", false, null);
+	ValueError = $pkg.ValueError = $newType(0, $kindStruct, "reflect.ValueError", true, "reflect", true, function(Method_, Kind_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Method = "";
@@ -13524,16 +13525,6 @@ $packages["reflect"] = (function() {
 		}
 		this.Method = Method_;
 		this.Kind = Kind_;
-	});
-	nonEmptyInterface = $pkg.nonEmptyInterface = $newType(0, $kindStruct, "reflect.nonEmptyInterface", "nonEmptyInterface", "reflect", function(itab_, word_) {
-		this.$val = this;
-		if (arguments.length === 0) {
-			this.itab = ptrType$9.nil;
-			this.word = 0;
-			return;
-		}
-		this.itab = itab_;
-		this.word = word_;
 	});
 	sliceType$1 = $sliceType(name);
 	ptrType$1 = $ptrType(rtype);
@@ -13554,26 +13545,22 @@ $packages["reflect"] = (function() {
 	structType$8 = $structType("reflect", [{prop: "str", name: "str", exported: false, typ: $String, tag: ""}]);
 	sliceType$9 = $sliceType(ptrType$3);
 	sliceType$10 = $sliceType(Value);
-	ptrType$8 = $ptrType(nonEmptyInterface);
-	arrayType$1 = $arrayType($UnsafePointer, 100000);
-	structType$9 = $structType("reflect", [{prop: "ityp", name: "ityp", exported: false, typ: ptrType$1, tag: ""}, {prop: "typ", name: "typ", exported: false, typ: ptrType$1, tag: ""}, {prop: "link", name: "link", exported: false, typ: $UnsafePointer, tag: ""}, {prop: "bad", name: "bad", exported: false, typ: $Int32, tag: ""}, {prop: "unused", name: "unused", exported: false, typ: $Int32, tag: ""}, {prop: "fun", name: "fun", exported: false, typ: arrayType$1, tag: ""}]);
-	ptrType$9 = $ptrType(structType$9);
 	sliceType$11 = $sliceType(Type);
 	sliceType$12 = $sliceType(sliceType$9);
-	ptrType$10 = $ptrType(interfaceType);
-	ptrType$11 = $ptrType(imethod);
+	ptrType$8 = $ptrType(interfaceType);
+	ptrType$9 = $ptrType(imethod);
 	sliceType$14 = $sliceType($Int);
 	sliceType$15 = $sliceType(fieldScan);
-	ptrType$12 = $ptrType(structType);
+	ptrType$10 = $ptrType(structType);
 	sliceType$16 = $sliceType($Uint8);
-	ptrType$17 = $ptrType($UnsafePointer);
+	ptrType$16 = $ptrType($UnsafePointer);
 	sliceType$18 = $sliceType($Int32);
-	ptrType$18 = $ptrType(funcType);
+	ptrType$17 = $ptrType(funcType);
 	funcType$3 = $funcType([$String], [$Bool], false);
 	funcType$4 = $funcType([$UnsafePointer, $Uintptr], [$Uintptr], false);
 	funcType$5 = $funcType([$UnsafePointer, $UnsafePointer], [$Bool], false);
-	arrayType$13 = $arrayType($Uintptr, 2);
-	ptrType$19 = $ptrType(ValueError);
+	arrayType$12 = $arrayType($Uintptr, 2);
+	ptrType$18 = $ptrType(ValueError);
 	init = function() {
 		var $ptr, used, x, x$1, x$10, x$11, x$12, x$2, x$3, x$4, x$5, x$6, x$7, x$8, x$9, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; used = $f.used; x = $f.x; x$1 = $f.x$1; x$10 = $f.x$10; x$11 = $f.x$11; x$12 = $f.x$12; x$2 = $f.x$2; x$3 = $f.x$3; x$4 = $f.x$4; x$5 = $f.x$5; x$6 = $f.x$6; x$7 = $f.x$7; x$8 = $f.x$8; x$9 = $f.x$9; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -13604,12 +13591,15 @@ $packages["reflect"] = (function() {
 	reflectType = function(typ) {
 		var $ptr, _1, _i, _i$1, _i$2, _i$3, _i$4, _key, _ref, _ref$1, _ref$2, _ref$3, _ref$4, dir, f, fields, i, i$1, i$2, i$3, i$4, imethods, in$1, m, m$1, methodSet, methods, out, outCount, params, reflectFields, reflectMethods, results, rt, typ, ut;
 		if (typ.reflectType === undefined) {
-			rt = new rtype.ptr((($parseInt(typ.size) >> 0) >>> 0), 0, 0, 0, 0, 0, (($parseInt(typ.kind) >> 0) << 24 >>> 24), ptrType$4.nil, ptrType$5.nil, newNameOff(newName(internalStr(typ.string), "", internalStr(typ.pkg), false)), 0);
+			rt = new rtype.ptr((($parseInt(typ.size) >> 0) >>> 0), 0, 0, 0, 0, 0, (($parseInt(typ.kind) >> 0) << 24 >>> 24), ptrType$4.nil, ptrType$5.nil, newNameOff(newName(internalStr(typ.string), "", "", !!(typ.exported))), 0);
 			rt.jsType = typ;
 			typ.reflectType = rt;
 			methodSet = $methodSet(typ);
-			if (!(($parseInt(methodSet.length) === 0))) {
+			if (!(($parseInt(methodSet.length) === 0)) || !!(typ.named)) {
 				rt.tflag = (rt.tflag | (1)) >>> 0;
+				if (!!(typ.named)) {
+					rt.tflag = (rt.tflag | (4)) >>> 0;
+				}
 				reflectMethods = $makeSlice(sliceType$3, $parseInt(methodSet.length));
 				_ref = reflectMethods;
 				_i = 0;
@@ -13620,12 +13610,9 @@ $packages["reflect"] = (function() {
 					method.copy(((i < 0 || i >= reflectMethods.$length) ? $throwRuntimeError("index out of range") : reflectMethods.$array[reflectMethods.$offset + i]), new method.ptr(newNameOff(newName(internalStr(m.name), "", "", internalStr(m.pkg) === "")), newTypeOff(reflectType(m.typ)), 0, 0));
 					_i++;
 				}
-				ut = new uncommonType.ptr(0, ($parseInt(methodSet.length) << 16 >>> 16), 0, 0, 0, reflectMethods);
+				ut = new uncommonType.ptr(newNameOff(newName(internalStr(typ.pkg), "", "", false)), ($parseInt(methodSet.length) << 16 >>> 16), 0, 0, 0, reflectMethods);
 				_key = rt; (uncommonTypeMap || $throwRuntimeError("assignment to entry in nil map"))[ptrType$1.keyFor(_key)] = { k: _key, v: ut };
 				ut.jsType = typ;
-			}
-			if (!($internalize(typ.typeName, $String) === "")) {
-				rt.tflag = (rt.tflag | (4)) >>> 0;
 			}
 			_1 = rt.Kind();
 			if (_1 === (17)) {
@@ -14161,8 +14148,8 @@ $packages["reflect"] = (function() {
 	};
 	$pkg.Copy = Copy;
 	methodReceiver = function(op, v, i) {
-		var $ptr, fn, i, iface, m, m$1, op, prop, rcvr, rcvrtype, t, tt, ut, v, x, x$1;
-		rcvrtype = ptrType$1.nil;
+		var $ptr, _$37, fn, i, m, m$1, op, prop, rcvr, t, tt, ut, v, x, x$1;
+		_$37 = ptrType$1.nil;
 		t = ptrType$1.nil;
 		fn = 0;
 		v = v;
@@ -14175,10 +14162,6 @@ $packages["reflect"] = (function() {
 			m = (x = tt.methods, ((i < 0 || i >= x.$length) ? $throwRuntimeError("index out of range") : x.$array[x.$offset + i]));
 			if (!tt.rtype.nameOff(m.name).isExported()) {
 				$panic(new $String("reflect: " + op + " of unexported method"));
-			}
-			iface = $pointerOfStructConversion(v.ptr, ptrType$8);
-			if (iface.itab === ptrType$9.nil) {
-				$panic(new $String("reflect: " + op + " of method on nil interface value"));
 			}
 			t = tt.rtype.typeOff(m.typ);
 			prop = tt.rtype.nameOff(m.name).name();
@@ -14199,7 +14182,7 @@ $packages["reflect"] = (function() {
 			rcvr = new (jsType(v.typ))(rcvr);
 		}
 		fn = rcvr[$externalize(prop, $String)];
-		return [rcvrtype, t, fn];
+		return [_$37, t, fn];
 	};
 	valueInterface = function(v, safe) {
 		var $ptr, _r, safe, v, $s, $r;
@@ -15534,10 +15517,10 @@ $packages["reflect"] = (function() {
 		m = new Method.ptr("", "", $ifaceNil, new Value.ptr(ptrType$1.nil, 0, 0), 0);
 		ok = false;
 		t = this;
-		if (t === ptrType$10.nil) {
+		if (t === ptrType$8.nil) {
 			return [m, ok];
 		}
-		p = ptrType$11.nil;
+		p = ptrType$9.nil;
 		_ref = t.methods;
 		_i = 0;
 		while (true) {
@@ -15712,7 +15695,7 @@ $packages["reflect"] = (function() {
 		current = new sliceType$15([]);
 		next = new sliceType$15([new fieldScan.ptr(t, sliceType$14.nil)]);
 		nextCount = false;
-		visited = $makeMap(ptrType$12.keyFor, []);
+		visited = $makeMap(ptrType$10.keyFor, []);
 		/* while (true) { */ case 1:
 			/* if (!(next.$length > 0)) { break; } */ if(!(next.$length > 0)) { $s = 2; continue; }
 			_tmp = next;
@@ -15727,13 +15710,13 @@ $packages["reflect"] = (function() {
 				/* if (!(_i < _ref.$length)) { break; } */ if(!(_i < _ref.$length)) { $s = 4; continue; }
 				scan = $clone(((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]), fieldScan);
 				t$1 = scan.typ;
-				/* */ if ((_entry = visited[ptrType$12.keyFor(t$1)], _entry !== undefined ? _entry.v : false)) { $s = 5; continue; }
+				/* */ if ((_entry = visited[ptrType$10.keyFor(t$1)], _entry !== undefined ? _entry.v : false)) { $s = 5; continue; }
 				/* */ $s = 6; continue;
-				/* if ((_entry = visited[ptrType$12.keyFor(t$1)], _entry !== undefined ? _entry.v : false)) { */ case 5:
+				/* if ((_entry = visited[ptrType$10.keyFor(t$1)], _entry !== undefined ? _entry.v : false)) { */ case 5:
 					_i++;
 					/* continue; */ $s = 3; continue;
 				/* } */ case 6:
-				_key = t$1; (visited || $throwRuntimeError("assignment to entry in nil map"))[ptrType$12.keyFor(_key)] = { k: _key, v: true };
+				_key = t$1; (visited || $throwRuntimeError("assignment to entry in nil map"))[ptrType$10.keyFor(_key)] = { k: _key, v: true };
 				_ref$1 = t$1.fields;
 				_i$1 = 0;
 				/* while (true) { */ case 7:
@@ -15762,7 +15745,7 @@ $packages["reflect"] = (function() {
 					/* */ if (_r$1) { $s = 15; continue; }
 					/* */ $s = 16; continue;
 					/* if (_r$1) { */ case 15:
-						if ((_entry$1 = count[ptrType$12.keyFor(t$1)], _entry$1 !== undefined ? _entry$1.v : 0) > 1 || ok) {
+						if ((_entry$1 = count[ptrType$10.keyFor(t$1)], _entry$1 !== undefined ? _entry$1.v : 0) > 1 || ok) {
 							_tmp$2 = new StructField.ptr("", "", $ifaceNil, "", 0, sliceType$14.nil, false);
 							_tmp$3 = false;
 							StructField.copy(result, _tmp$2);
@@ -15783,17 +15766,17 @@ $packages["reflect"] = (function() {
 						/* continue; */ $s = 7; continue;
 					}
 					styp = ntyp.kindType;
-					if ((_entry$2 = nextCount[ptrType$12.keyFor(styp)], _entry$2 !== undefined ? _entry$2.v : 0) > 0) {
-						_key$1 = styp; (nextCount || $throwRuntimeError("assignment to entry in nil map"))[ptrType$12.keyFor(_key$1)] = { k: _key$1, v: 2 };
+					if ((_entry$2 = nextCount[ptrType$10.keyFor(styp)], _entry$2 !== undefined ? _entry$2.v : 0) > 0) {
+						_key$1 = styp; (nextCount || $throwRuntimeError("assignment to entry in nil map"))[ptrType$10.keyFor(_key$1)] = { k: _key$1, v: 2 };
 						_i$1++;
 						/* continue; */ $s = 7; continue;
 					}
 					if (nextCount === false) {
-						nextCount = $makeMap(ptrType$12.keyFor, []);
+						nextCount = $makeMap(ptrType$10.keyFor, []);
 					}
-					_key$2 = styp; (nextCount || $throwRuntimeError("assignment to entry in nil map"))[ptrType$12.keyFor(_key$2)] = { k: _key$2, v: 1 };
-					if ((_entry$3 = count[ptrType$12.keyFor(t$1)], _entry$3 !== undefined ? _entry$3.v : 0) > 1) {
-						_key$3 = styp; (nextCount || $throwRuntimeError("assignment to entry in nil map"))[ptrType$12.keyFor(_key$3)] = { k: _key$3, v: 2 };
+					_key$2 = styp; (nextCount || $throwRuntimeError("assignment to entry in nil map"))[ptrType$10.keyFor(_key$2)] = { k: _key$2, v: 1 };
+					if ((_entry$3 = count[ptrType$10.keyFor(t$1)], _entry$3 !== undefined ? _entry$3.v : 0) > 1) {
+						_key$3 = styp; (nextCount || $throwRuntimeError("assignment to entry in nil map"))[ptrType$10.keyFor(_key$3)] = { k: _key$3, v: 2 };
 					}
 					index = sliceType$14.nil;
 					index = $appendSlice(index, scan.index);
@@ -16380,7 +16363,7 @@ $packages["reflect"] = (function() {
 		if (!((((key.flag & 128) >>> 0) === 0))) {
 			k = key.ptr;
 		} else {
-			k = (key.$ptr_ptr || (key.$ptr_ptr = new ptrType$17(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, key)));
+			k = (key.$ptr_ptr || (key.$ptr_ptr = new ptrType$16(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, key)));
 		}
 		e = mapaccess(v.typ, v.pointer(), k);
 		if (e === 0) {
@@ -16603,7 +16586,7 @@ $packages["reflect"] = (function() {
 			val.ptr = p;
 			val.flag = (val.flag | (128)) >>> 0;
 		} else {
-			p = (val.$ptr_ptr || (val.$ptr_ptr = new ptrType$17(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, val)));
+			p = (val.$ptr_ptr || (val.$ptr_ptr = new ptrType$16(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, val)));
 		}
 		_r = chanrecv(v.typ, v.pointer(), nb, p); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		_tuple = _r;
@@ -16645,7 +16628,7 @@ $packages["reflect"] = (function() {
 		if (!((((x.flag & 128) >>> 0) === 0))) {
 			p = x.ptr;
 		} else {
-			p = (x.$ptr_ptr || (x.$ptr_ptr = new ptrType$17(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, x)));
+			p = (x.$ptr_ptr || (x.$ptr_ptr = new ptrType$16(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, x)));
 		}
 		_r$1 = chansend(v.typ, v.pointer(), p, nb); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 		selected = _r$1;
@@ -16745,7 +16728,7 @@ $packages["reflect"] = (function() {
 		if (!((((key.flag & 128) >>> 0) === 0))) {
 			k = key.ptr;
 		} else {
-			k = (key.$ptr_ptr || (key.$ptr_ptr = new ptrType$17(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, key)));
+			k = (key.$ptr_ptr || (key.$ptr_ptr = new ptrType$16(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, key)));
 		}
 		if (val.typ === ptrType$1.nil) {
 			mapdelete(v.typ, v.pointer(), k);
@@ -16758,7 +16741,7 @@ $packages["reflect"] = (function() {
 		if (!((((val.flag & 128) >>> 0) === 0))) {
 			e = val.ptr;
 		} else {
-			e = (val.$ptr_ptr || (val.$ptr_ptr = new ptrType$17(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, val)));
+			e = (val.$ptr_ptr || (val.$ptr_ptr = new ptrType$16(function() { return this.$target.ptr; }, function($v) { this.$target.ptr = $v; }, val)));
 		}
 		$r = mapassign(v.typ, v.pointer(), k, e); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: Value.ptr.prototype.SetMapIndex }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f.e = e; $f.k = k; $f.key = key; $f.tt = tt; $f.v = v; $f.val = val; $f.$s = $s; $f.$r = $r; return $f;
@@ -17356,17 +17339,17 @@ $packages["reflect"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: cvtI2I }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f.ret = ret; $f.typ = typ; $f.v = v; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	ptrType$6.methods = [{prop: "methods", name: "methods", pkg: "reflect", typ: $funcType([], [sliceType$3], false)}];
-	ptrType$18.methods = [{prop: "in$", name: "in", pkg: "reflect", typ: $funcType([], [sliceType$2], false)}, {prop: "out", name: "out", pkg: "reflect", typ: $funcType([], [sliceType$2], false)}];
+	ptrType$17.methods = [{prop: "in$", name: "in", pkg: "reflect", typ: $funcType([], [sliceType$2], false)}, {prop: "out", name: "out", pkg: "reflect", typ: $funcType([], [sliceType$2], false)}];
 	name.methods = [{prop: "name", name: "name", pkg: "reflect", typ: $funcType([], [$String], false)}, {prop: "tag", name: "tag", pkg: "reflect", typ: $funcType([], [$String], false)}, {prop: "pkgPath", name: "pkgPath", pkg: "reflect", typ: $funcType([], [$String], false)}, {prop: "isExported", name: "isExported", pkg: "reflect", typ: $funcType([], [$Bool], false)}, {prop: "data", name: "data", pkg: "reflect", typ: $funcType([$Int], [ptrType$5], false)}, {prop: "nameLen", name: "nameLen", pkg: "reflect", typ: $funcType([], [$Int], false)}, {prop: "tagLen", name: "tagLen", pkg: "reflect", typ: $funcType([], [$Int], false)}];
 	Kind.methods = [{prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}];
 	ptrType$1.methods = [{prop: "uncommon", name: "uncommon", pkg: "reflect", typ: $funcType([], [ptrType$6], false)}, {prop: "nameOff", name: "nameOff", pkg: "reflect", typ: $funcType([nameOff], [name], false)}, {prop: "typeOff", name: "typeOff", pkg: "reflect", typ: $funcType([typeOff], [ptrType$1], false)}, {prop: "ptrTo", name: "ptrTo", pkg: "reflect", typ: $funcType([], [ptrType$1], false)}, {prop: "pointers", name: "pointers", pkg: "reflect", typ: $funcType([], [$Bool], false)}, {prop: "Comparable", name: "Comparable", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Method", name: "Method", pkg: "", typ: $funcType([$Int], [Method], false)}, {prop: "textOff", name: "textOff", pkg: "reflect", typ: $funcType([textOff], [$UnsafePointer], false)}, {prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Size", name: "Size", pkg: "", typ: $funcType([], [$Uintptr], false)}, {prop: "Bits", name: "Bits", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Align", name: "Align", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "FieldAlign", name: "FieldAlign", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Kind", name: "Kind", pkg: "", typ: $funcType([], [Kind], false)}, {prop: "common", name: "common", pkg: "reflect", typ: $funcType([], [ptrType$1], false)}, {prop: "exportedMethods", name: "exportedMethods", pkg: "reflect", typ: $funcType([], [sliceType$3], false)}, {prop: "NumMethod", name: "NumMethod", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "MethodByName", name: "MethodByName", pkg: "", typ: $funcType([$String], [Method, $Bool], false)}, {prop: "PkgPath", name: "PkgPath", pkg: "", typ: $funcType([], [$String], false)}, {prop: "Name", name: "Name", pkg: "", typ: $funcType([], [$String], false)}, {prop: "ChanDir", name: "ChanDir", pkg: "", typ: $funcType([], [ChanDir], false)}, {prop: "IsVariadic", name: "IsVariadic", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Elem", name: "Elem", pkg: "", typ: $funcType([], [Type], false)}, {prop: "Field", name: "Field", pkg: "", typ: $funcType([$Int], [StructField], false)}, {prop: "FieldByIndex", name: "FieldByIndex", pkg: "", typ: $funcType([sliceType$14], [StructField], false)}, {prop: "FieldByName", name: "FieldByName", pkg: "", typ: $funcType([$String], [StructField, $Bool], false)}, {prop: "FieldByNameFunc", name: "FieldByNameFunc", pkg: "", typ: $funcType([funcType$3], [StructField, $Bool], false)}, {prop: "In", name: "In", pkg: "", typ: $funcType([$Int], [Type], false)}, {prop: "Key", name: "Key", pkg: "", typ: $funcType([], [Type], false)}, {prop: "Len", name: "Len", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "NumField", name: "NumField", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "NumIn", name: "NumIn", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "NumOut", name: "NumOut", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Out", name: "Out", pkg: "", typ: $funcType([$Int], [Type], false)}, {prop: "Implements", name: "Implements", pkg: "", typ: $funcType([Type], [$Bool], false)}, {prop: "AssignableTo", name: "AssignableTo", pkg: "", typ: $funcType([Type], [$Bool], false)}, {prop: "ConvertibleTo", name: "ConvertibleTo", pkg: "", typ: $funcType([Type], [$Bool], false)}];
 	ChanDir.methods = [{prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}];
-	ptrType$10.methods = [{prop: "Method", name: "Method", pkg: "", typ: $funcType([$Int], [Method], false)}, {prop: "NumMethod", name: "NumMethod", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "MethodByName", name: "MethodByName", pkg: "", typ: $funcType([$String], [Method, $Bool], false)}];
-	ptrType$12.methods = [{prop: "Field", name: "Field", pkg: "", typ: $funcType([$Int], [StructField], false)}, {prop: "FieldByIndex", name: "FieldByIndex", pkg: "", typ: $funcType([sliceType$14], [StructField], false)}, {prop: "FieldByNameFunc", name: "FieldByNameFunc", pkg: "", typ: $funcType([funcType$3], [StructField, $Bool], false)}, {prop: "FieldByName", name: "FieldByName", pkg: "", typ: $funcType([$String], [StructField, $Bool], false)}];
+	ptrType$8.methods = [{prop: "Method", name: "Method", pkg: "", typ: $funcType([$Int], [Method], false)}, {prop: "NumMethod", name: "NumMethod", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "MethodByName", name: "MethodByName", pkg: "", typ: $funcType([$String], [Method, $Bool], false)}];
+	ptrType$10.methods = [{prop: "Field", name: "Field", pkg: "", typ: $funcType([$Int], [StructField], false)}, {prop: "FieldByIndex", name: "FieldByIndex", pkg: "", typ: $funcType([sliceType$14], [StructField], false)}, {prop: "FieldByNameFunc", name: "FieldByNameFunc", pkg: "", typ: $funcType([funcType$3], [StructField, $Bool], false)}, {prop: "FieldByName", name: "FieldByName", pkg: "", typ: $funcType([$String], [StructField, $Bool], false)}];
 	StructTag.methods = [{prop: "Get", name: "Get", pkg: "", typ: $funcType([$String], [$String], false)}, {prop: "Lookup", name: "Lookup", pkg: "", typ: $funcType([$String], [$String, $Bool], false)}];
-	Value.methods = [{prop: "object", name: "object", pkg: "reflect", typ: $funcType([], [ptrType$3], false)}, {prop: "call", name: "call", pkg: "reflect", typ: $funcType([$String, sliceType$10], [sliceType$10], false)}, {prop: "Cap", name: "Cap", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Elem", name: "Elem", pkg: "", typ: $funcType([], [Value], false)}, {prop: "Field", name: "Field", pkg: "", typ: $funcType([$Int], [Value], false)}, {prop: "Index", name: "Index", pkg: "", typ: $funcType([$Int], [Value], false)}, {prop: "InterfaceData", name: "InterfaceData", pkg: "", typ: $funcType([], [arrayType$13], false)}, {prop: "IsNil", name: "IsNil", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Len", name: "Len", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Pointer", name: "Pointer", pkg: "", typ: $funcType([], [$Uintptr], false)}, {prop: "Set", name: "Set", pkg: "", typ: $funcType([Value], [], false)}, {prop: "SetBytes", name: "SetBytes", pkg: "", typ: $funcType([sliceType$16], [], false)}, {prop: "SetCap", name: "SetCap", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "SetLen", name: "SetLen", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "Slice", name: "Slice", pkg: "", typ: $funcType([$Int, $Int], [Value], false)}, {prop: "Slice3", name: "Slice3", pkg: "", typ: $funcType([$Int, $Int, $Int], [Value], false)}, {prop: "Close", name: "Close", pkg: "", typ: $funcType([], [], false)}, {prop: "pointer", name: "pointer", pkg: "reflect", typ: $funcType([], [$UnsafePointer], false)}, {prop: "Addr", name: "Addr", pkg: "", typ: $funcType([], [Value], false)}, {prop: "Bool", name: "Bool", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Bytes", name: "Bytes", pkg: "", typ: $funcType([], [sliceType$16], false)}, {prop: "runes", name: "runes", pkg: "reflect", typ: $funcType([], [sliceType$18], false)}, {prop: "CanAddr", name: "CanAddr", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "CanSet", name: "CanSet", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Call", name: "Call", pkg: "", typ: $funcType([sliceType$10], [sliceType$10], false)}, {prop: "CallSlice", name: "CallSlice", pkg: "", typ: $funcType([sliceType$10], [sliceType$10], false)}, {prop: "Complex", name: "Complex", pkg: "", typ: $funcType([], [$Complex128], false)}, {prop: "FieldByIndex", name: "FieldByIndex", pkg: "", typ: $funcType([sliceType$14], [Value], false)}, {prop: "FieldByName", name: "FieldByName", pkg: "", typ: $funcType([$String], [Value], false)}, {prop: "FieldByNameFunc", name: "FieldByNameFunc", pkg: "", typ: $funcType([funcType$3], [Value], false)}, {prop: "Float", name: "Float", pkg: "", typ: $funcType([], [$Float64], false)}, {prop: "Int", name: "Int", pkg: "", typ: $funcType([], [$Int64], false)}, {prop: "CanInterface", name: "CanInterface", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Interface", name: "Interface", pkg: "", typ: $funcType([], [$emptyInterface], false)}, {prop: "IsValid", name: "IsValid", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Kind", name: "Kind", pkg: "", typ: $funcType([], [Kind], false)}, {prop: "MapIndex", name: "MapIndex", pkg: "", typ: $funcType([Value], [Value], false)}, {prop: "MapKeys", name: "MapKeys", pkg: "", typ: $funcType([], [sliceType$10], false)}, {prop: "Method", name: "Method", pkg: "", typ: $funcType([$Int], [Value], false)}, {prop: "NumMethod", name: "NumMethod", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "MethodByName", name: "MethodByName", pkg: "", typ: $funcType([$String], [Value], false)}, {prop: "NumField", name: "NumField", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "OverflowComplex", name: "OverflowComplex", pkg: "", typ: $funcType([$Complex128], [$Bool], false)}, {prop: "OverflowFloat", name: "OverflowFloat", pkg: "", typ: $funcType([$Float64], [$Bool], false)}, {prop: "OverflowInt", name: "OverflowInt", pkg: "", typ: $funcType([$Int64], [$Bool], false)}, {prop: "OverflowUint", name: "OverflowUint", pkg: "", typ: $funcType([$Uint64], [$Bool], false)}, {prop: "Recv", name: "Recv", pkg: "", typ: $funcType([], [Value, $Bool], false)}, {prop: "recv", name: "recv", pkg: "reflect", typ: $funcType([$Bool], [Value, $Bool], false)}, {prop: "Send", name: "Send", pkg: "", typ: $funcType([Value], [], false)}, {prop: "send", name: "send", pkg: "reflect", typ: $funcType([Value, $Bool], [$Bool], false)}, {prop: "SetBool", name: "SetBool", pkg: "", typ: $funcType([$Bool], [], false)}, {prop: "setRunes", name: "setRunes", pkg: "reflect", typ: $funcType([sliceType$18], [], false)}, {prop: "SetComplex", name: "SetComplex", pkg: "", typ: $funcType([$Complex128], [], false)}, {prop: "SetFloat", name: "SetFloat", pkg: "", typ: $funcType([$Float64], [], false)}, {prop: "SetInt", name: "SetInt", pkg: "", typ: $funcType([$Int64], [], false)}, {prop: "SetMapIndex", name: "SetMapIndex", pkg: "", typ: $funcType([Value, Value], [], false)}, {prop: "SetUint", name: "SetUint", pkg: "", typ: $funcType([$Uint64], [], false)}, {prop: "SetPointer", name: "SetPointer", pkg: "", typ: $funcType([$UnsafePointer], [], false)}, {prop: "SetString", name: "SetString", pkg: "", typ: $funcType([$String], [], false)}, {prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "TryRecv", name: "TryRecv", pkg: "", typ: $funcType([], [Value, $Bool], false)}, {prop: "TrySend", name: "TrySend", pkg: "", typ: $funcType([Value], [$Bool], false)}, {prop: "Type", name: "Type", pkg: "", typ: $funcType([], [Type], false)}, {prop: "Uint", name: "Uint", pkg: "", typ: $funcType([], [$Uint64], false)}, {prop: "UnsafeAddr", name: "UnsafeAddr", pkg: "", typ: $funcType([], [$Uintptr], false)}, {prop: "assignTo", name: "assignTo", pkg: "reflect", typ: $funcType([$String, ptrType$1, $UnsafePointer], [Value], false)}, {prop: "Convert", name: "Convert", pkg: "", typ: $funcType([Type], [Value], false)}];
+	Value.methods = [{prop: "object", name: "object", pkg: "reflect", typ: $funcType([], [ptrType$3], false)}, {prop: "call", name: "call", pkg: "reflect", typ: $funcType([$String, sliceType$10], [sliceType$10], false)}, {prop: "Cap", name: "Cap", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Elem", name: "Elem", pkg: "", typ: $funcType([], [Value], false)}, {prop: "Field", name: "Field", pkg: "", typ: $funcType([$Int], [Value], false)}, {prop: "Index", name: "Index", pkg: "", typ: $funcType([$Int], [Value], false)}, {prop: "InterfaceData", name: "InterfaceData", pkg: "", typ: $funcType([], [arrayType$12], false)}, {prop: "IsNil", name: "IsNil", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Len", name: "Len", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Pointer", name: "Pointer", pkg: "", typ: $funcType([], [$Uintptr], false)}, {prop: "Set", name: "Set", pkg: "", typ: $funcType([Value], [], false)}, {prop: "SetBytes", name: "SetBytes", pkg: "", typ: $funcType([sliceType$16], [], false)}, {prop: "SetCap", name: "SetCap", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "SetLen", name: "SetLen", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "Slice", name: "Slice", pkg: "", typ: $funcType([$Int, $Int], [Value], false)}, {prop: "Slice3", name: "Slice3", pkg: "", typ: $funcType([$Int, $Int, $Int], [Value], false)}, {prop: "Close", name: "Close", pkg: "", typ: $funcType([], [], false)}, {prop: "pointer", name: "pointer", pkg: "reflect", typ: $funcType([], [$UnsafePointer], false)}, {prop: "Addr", name: "Addr", pkg: "", typ: $funcType([], [Value], false)}, {prop: "Bool", name: "Bool", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Bytes", name: "Bytes", pkg: "", typ: $funcType([], [sliceType$16], false)}, {prop: "runes", name: "runes", pkg: "reflect", typ: $funcType([], [sliceType$18], false)}, {prop: "CanAddr", name: "CanAddr", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "CanSet", name: "CanSet", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Call", name: "Call", pkg: "", typ: $funcType([sliceType$10], [sliceType$10], false)}, {prop: "CallSlice", name: "CallSlice", pkg: "", typ: $funcType([sliceType$10], [sliceType$10], false)}, {prop: "Complex", name: "Complex", pkg: "", typ: $funcType([], [$Complex128], false)}, {prop: "FieldByIndex", name: "FieldByIndex", pkg: "", typ: $funcType([sliceType$14], [Value], false)}, {prop: "FieldByName", name: "FieldByName", pkg: "", typ: $funcType([$String], [Value], false)}, {prop: "FieldByNameFunc", name: "FieldByNameFunc", pkg: "", typ: $funcType([funcType$3], [Value], false)}, {prop: "Float", name: "Float", pkg: "", typ: $funcType([], [$Float64], false)}, {prop: "Int", name: "Int", pkg: "", typ: $funcType([], [$Int64], false)}, {prop: "CanInterface", name: "CanInterface", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Interface", name: "Interface", pkg: "", typ: $funcType([], [$emptyInterface], false)}, {prop: "IsValid", name: "IsValid", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "Kind", name: "Kind", pkg: "", typ: $funcType([], [Kind], false)}, {prop: "MapIndex", name: "MapIndex", pkg: "", typ: $funcType([Value], [Value], false)}, {prop: "MapKeys", name: "MapKeys", pkg: "", typ: $funcType([], [sliceType$10], false)}, {prop: "Method", name: "Method", pkg: "", typ: $funcType([$Int], [Value], false)}, {prop: "NumMethod", name: "NumMethod", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "MethodByName", name: "MethodByName", pkg: "", typ: $funcType([$String], [Value], false)}, {prop: "NumField", name: "NumField", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "OverflowComplex", name: "OverflowComplex", pkg: "", typ: $funcType([$Complex128], [$Bool], false)}, {prop: "OverflowFloat", name: "OverflowFloat", pkg: "", typ: $funcType([$Float64], [$Bool], false)}, {prop: "OverflowInt", name: "OverflowInt", pkg: "", typ: $funcType([$Int64], [$Bool], false)}, {prop: "OverflowUint", name: "OverflowUint", pkg: "", typ: $funcType([$Uint64], [$Bool], false)}, {prop: "Recv", name: "Recv", pkg: "", typ: $funcType([], [Value, $Bool], false)}, {prop: "recv", name: "recv", pkg: "reflect", typ: $funcType([$Bool], [Value, $Bool], false)}, {prop: "Send", name: "Send", pkg: "", typ: $funcType([Value], [], false)}, {prop: "send", name: "send", pkg: "reflect", typ: $funcType([Value, $Bool], [$Bool], false)}, {prop: "SetBool", name: "SetBool", pkg: "", typ: $funcType([$Bool], [], false)}, {prop: "setRunes", name: "setRunes", pkg: "reflect", typ: $funcType([sliceType$18], [], false)}, {prop: "SetComplex", name: "SetComplex", pkg: "", typ: $funcType([$Complex128], [], false)}, {prop: "SetFloat", name: "SetFloat", pkg: "", typ: $funcType([$Float64], [], false)}, {prop: "SetInt", name: "SetInt", pkg: "", typ: $funcType([$Int64], [], false)}, {prop: "SetMapIndex", name: "SetMapIndex", pkg: "", typ: $funcType([Value, Value], [], false)}, {prop: "SetUint", name: "SetUint", pkg: "", typ: $funcType([$Uint64], [], false)}, {prop: "SetPointer", name: "SetPointer", pkg: "", typ: $funcType([$UnsafePointer], [], false)}, {prop: "SetString", name: "SetString", pkg: "", typ: $funcType([$String], [], false)}, {prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}, {prop: "TryRecv", name: "TryRecv", pkg: "", typ: $funcType([], [Value, $Bool], false)}, {prop: "TrySend", name: "TrySend", pkg: "", typ: $funcType([Value], [$Bool], false)}, {prop: "Type", name: "Type", pkg: "", typ: $funcType([], [Type], false)}, {prop: "Uint", name: "Uint", pkg: "", typ: $funcType([], [$Uint64], false)}, {prop: "UnsafeAddr", name: "UnsafeAddr", pkg: "", typ: $funcType([], [$Uintptr], false)}, {prop: "assignTo", name: "assignTo", pkg: "reflect", typ: $funcType([$String, ptrType$1, $UnsafePointer], [Value], false)}, {prop: "Convert", name: "Convert", pkg: "", typ: $funcType([Type], [Value], false)}];
 	flag.methods = [{prop: "kind", name: "kind", pkg: "reflect", typ: $funcType([], [Kind], false)}, {prop: "mustBe", name: "mustBe", pkg: "reflect", typ: $funcType([Kind], [], false)}, {prop: "mustBeExported", name: "mustBeExported", pkg: "reflect", typ: $funcType([], [], false)}, {prop: "mustBeAssignable", name: "mustBeAssignable", pkg: "reflect", typ: $funcType([], [], false)}];
-	ptrType$19.methods = [{prop: "Error", name: "Error", pkg: "", typ: $funcType([], [$String], false)}];
+	ptrType$18.methods = [{prop: "Error", name: "Error", pkg: "", typ: $funcType([], [$String], false)}];
 	uncommonType.init("reflect", [{prop: "pkgPath", name: "pkgPath", exported: false, typ: nameOff, tag: ""}, {prop: "mcount", name: "mcount", exported: false, typ: $Uint16, tag: ""}, {prop: "_$2", name: "_", exported: false, typ: $Uint16, tag: ""}, {prop: "moff", name: "moff", exported: false, typ: $Uint32, tag: ""}, {prop: "_$4", name: "_", exported: false, typ: $Uint32, tag: ""}, {prop: "_methods", name: "_methods", exported: false, typ: sliceType$3, tag: ""}]);
 	funcType.init("reflect", [{prop: "rtype", name: "", exported: false, typ: rtype, tag: "reflect:\"func\""}, {prop: "inCount", name: "inCount", exported: false, typ: $Uint16, tag: ""}, {prop: "outCount", name: "outCount", exported: false, typ: $Uint16, tag: ""}, {prop: "_in", name: "_in", exported: false, typ: sliceType$2, tag: ""}, {prop: "_out", name: "_out", exported: false, typ: sliceType$2, tag: ""}]);
 	name.init("reflect", [{prop: "bytes", name: "bytes", exported: false, typ: ptrType$5, tag: ""}]);
@@ -17387,10 +17370,9 @@ $packages["reflect"] = (function() {
 	structType.init("reflect", [{prop: "rtype", name: "", exported: false, typ: rtype, tag: "reflect:\"struct\""}, {prop: "pkgPath", name: "pkgPath", exported: false, typ: name, tag: ""}, {prop: "fields", name: "fields", exported: false, typ: sliceType$8, tag: ""}]);
 	Method.init("", [{prop: "Name", name: "Name", exported: true, typ: $String, tag: ""}, {prop: "PkgPath", name: "PkgPath", exported: true, typ: $String, tag: ""}, {prop: "Type", name: "Type", exported: true, typ: Type, tag: ""}, {prop: "Func", name: "Func", exported: true, typ: Value, tag: ""}, {prop: "Index", name: "Index", exported: true, typ: $Int, tag: ""}]);
 	StructField.init("", [{prop: "Name", name: "Name", exported: true, typ: $String, tag: ""}, {prop: "PkgPath", name: "PkgPath", exported: true, typ: $String, tag: ""}, {prop: "Type", name: "Type", exported: true, typ: Type, tag: ""}, {prop: "Tag", name: "Tag", exported: true, typ: StructTag, tag: ""}, {prop: "Offset", name: "Offset", exported: true, typ: $Uintptr, tag: ""}, {prop: "Index", name: "Index", exported: true, typ: sliceType$14, tag: ""}, {prop: "Anonymous", name: "Anonymous", exported: true, typ: $Bool, tag: ""}]);
-	fieldScan.init("reflect", [{prop: "typ", name: "typ", exported: false, typ: ptrType$12, tag: ""}, {prop: "index", name: "index", exported: false, typ: sliceType$14, tag: ""}]);
+	fieldScan.init("reflect", [{prop: "typ", name: "typ", exported: false, typ: ptrType$10, tag: ""}, {prop: "index", name: "index", exported: false, typ: sliceType$14, tag: ""}]);
 	Value.init("reflect", [{prop: "typ", name: "typ", exported: false, typ: ptrType$1, tag: ""}, {prop: "ptr", name: "ptr", exported: false, typ: $UnsafePointer, tag: ""}, {prop: "flag", name: "", exported: false, typ: flag, tag: ""}]);
 	ValueError.init("", [{prop: "Method", name: "Method", exported: true, typ: $String, tag: ""}, {prop: "Kind", name: "Kind", exported: true, typ: Kind, tag: ""}]);
-	nonEmptyInterface.init("reflect", [{prop: "itab", name: "itab", exported: false, typ: ptrType$9, tag: ""}, {prop: "word", name: "word", exported: false, typ: $UnsafePointer, tag: ""}]);
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -17427,7 +17409,7 @@ $packages["fmt"] = (function() {
 	strconv = $packages["strconv"];
 	sync = $packages["sync"];
 	utf8 = $packages["unicode/utf8"];
-	fmtFlags = $pkg.fmtFlags = $newType(0, $kindStruct, "fmt.fmtFlags", "fmtFlags", "fmt", function(widPresent_, precPresent_, minus_, plus_, sharp_, space_, zero_, plusV_, sharpV_) {
+	fmtFlags = $pkg.fmtFlags = $newType(0, $kindStruct, "fmt.fmtFlags", true, "fmt", false, function(widPresent_, precPresent_, minus_, plus_, sharp_, space_, zero_, plusV_, sharpV_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.widPresent = false;
@@ -17451,7 +17433,7 @@ $packages["fmt"] = (function() {
 		this.plusV = plusV_;
 		this.sharpV = sharpV_;
 	});
-	fmt = $pkg.fmt = $newType(0, $kindStruct, "fmt.fmt", "fmt", "fmt", function(buf_, fmtFlags_, wid_, prec_, intbuf_) {
+	fmt = $pkg.fmt = $newType(0, $kindStruct, "fmt.fmt", true, "fmt", false, function(buf_, fmtFlags_, wid_, prec_, intbuf_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.buf = ptrType$1.nil;
@@ -17467,12 +17449,12 @@ $packages["fmt"] = (function() {
 		this.prec = prec_;
 		this.intbuf = intbuf_;
 	});
-	State = $pkg.State = $newType(8, $kindInterface, "fmt.State", "State", "fmt", null);
-	Formatter = $pkg.Formatter = $newType(8, $kindInterface, "fmt.Formatter", "Formatter", "fmt", null);
-	Stringer = $pkg.Stringer = $newType(8, $kindInterface, "fmt.Stringer", "Stringer", "fmt", null);
-	GoStringer = $pkg.GoStringer = $newType(8, $kindInterface, "fmt.GoStringer", "GoStringer", "fmt", null);
-	buffer = $pkg.buffer = $newType(12, $kindSlice, "fmt.buffer", "buffer", "fmt", null);
-	pp = $pkg.pp = $newType(0, $kindStruct, "fmt.pp", "pp", "fmt", function(buf_, arg_, value_, fmt_, reordered_, goodArgNum_, panicking_, erroring_) {
+	State = $pkg.State = $newType(8, $kindInterface, "fmt.State", true, "fmt", true, null);
+	Formatter = $pkg.Formatter = $newType(8, $kindInterface, "fmt.Formatter", true, "fmt", true, null);
+	Stringer = $pkg.Stringer = $newType(8, $kindInterface, "fmt.Stringer", true, "fmt", true, null);
+	GoStringer = $pkg.GoStringer = $newType(8, $kindInterface, "fmt.GoStringer", true, "fmt", true, null);
+	buffer = $pkg.buffer = $newType(12, $kindSlice, "fmt.buffer", true, "fmt", false, null);
+	pp = $pkg.pp = $newType(0, $kindStruct, "fmt.pp", true, "fmt", false, function(buf_, arg_, value_, fmt_, reordered_, goodArgNum_, panicking_, erroring_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.buf = buffer.nil;
@@ -17494,7 +17476,7 @@ $packages["fmt"] = (function() {
 		this.panicking = panicking_;
 		this.erroring = erroring_;
 	});
-	scanError = $pkg.scanError = $newType(0, $kindStruct, "fmt.scanError", "scanError", "fmt", function(err_) {
+	scanError = $pkg.scanError = $newType(0, $kindStruct, "fmt.scanError", true, "fmt", false, function(err_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.err = $ifaceNil;
@@ -17502,7 +17484,7 @@ $packages["fmt"] = (function() {
 		}
 		this.err = err_;
 	});
-	ss = $pkg.ss = $newType(0, $kindStruct, "fmt.ss", "ss", "fmt", function(rs_, buf_, count_, atEOF_, ssave_) {
+	ss = $pkg.ss = $newType(0, $kindStruct, "fmt.ss", true, "fmt", false, function(rs_, buf_, count_, atEOF_, ssave_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.rs = $ifaceNil;
@@ -17518,7 +17500,7 @@ $packages["fmt"] = (function() {
 		this.atEOF = atEOF_;
 		this.ssave = ssave_;
 	});
-	ssave = $pkg.ssave = $newType(0, $kindStruct, "fmt.ssave", "ssave", "fmt", function(validSave_, nlIsEnd_, nlIsSpace_, argLimit_, limit_, maxWid_) {
+	ssave = $pkg.ssave = $newType(0, $kindStruct, "fmt.ssave", true, "fmt", false, function(validSave_, nlIsEnd_, nlIsSpace_, argLimit_, limit_, maxWid_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.validSave = false;
@@ -20153,9 +20135,9 @@ $packages["encoding/xml"] = (function() {
 	sync = $packages["sync"];
 	unicode = $packages["unicode"];
 	utf8 = $packages["unicode/utf8"];
-	Marshaler = $pkg.Marshaler = $newType(8, $kindInterface, "xml.Marshaler", "Marshaler", "encoding/xml", null);
-	MarshalerAttr = $pkg.MarshalerAttr = $newType(8, $kindInterface, "xml.MarshalerAttr", "MarshalerAttr", "encoding/xml", null);
-	Encoder = $pkg.Encoder = $newType(0, $kindStruct, "xml.Encoder", "Encoder", "encoding/xml", function(p_) {
+	Marshaler = $pkg.Marshaler = $newType(8, $kindInterface, "xml.Marshaler", true, "encoding/xml", true, null);
+	MarshalerAttr = $pkg.MarshalerAttr = $newType(8, $kindInterface, "xml.MarshalerAttr", true, "encoding/xml", true, null);
+	Encoder = $pkg.Encoder = $newType(0, $kindStruct, "xml.Encoder", true, "encoding/xml", true, function(p_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.p = new printer.ptr(ptrType$6.nil, ptrType$7.nil, 0, "", "", 0, false, false, false, false, sliceType$3.nil, sliceType$4.nil);
@@ -20163,7 +20145,7 @@ $packages["encoding/xml"] = (function() {
 		}
 		this.p = p_;
 	});
-	printer = $pkg.printer = $newType(0, $kindStruct, "xml.printer", "printer", "encoding/xml", function(Writer_, encoder_, seq_, indent_, prefix_, depth_, indentedIn_, putNewline_, attrNS_, attrPrefix_, prefixes_, tags_) {
+	printer = $pkg.printer = $newType(0, $kindStruct, "xml.printer", true, "encoding/xml", false, function(Writer_, encoder_, seq_, indent_, prefix_, depth_, indentedIn_, putNewline_, attrNS_, attrPrefix_, prefixes_, tags_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Writer = ptrType$6.nil;
@@ -20193,7 +20175,7 @@ $packages["encoding/xml"] = (function() {
 		this.prefixes = prefixes_;
 		this.tags = tags_;
 	});
-	parentStack = $pkg.parentStack = $newType(0, $kindStruct, "xml.parentStack", "parentStack", "encoding/xml", function(p_, stack_) {
+	parentStack = $pkg.parentStack = $newType(0, $kindStruct, "xml.parentStack", true, "encoding/xml", false, function(p_, stack_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.p = ptrType$10.nil;
@@ -20203,7 +20185,7 @@ $packages["encoding/xml"] = (function() {
 		this.p = p_;
 		this.stack = stack_;
 	});
-	UnsupportedTypeError = $pkg.UnsupportedTypeError = $newType(0, $kindStruct, "xml.UnsupportedTypeError", "UnsupportedTypeError", "encoding/xml", function(Type_) {
+	UnsupportedTypeError = $pkg.UnsupportedTypeError = $newType(0, $kindStruct, "xml.UnsupportedTypeError", true, "encoding/xml", true, function(Type_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Type = $ifaceNil;
@@ -20211,10 +20193,10 @@ $packages["encoding/xml"] = (function() {
 		}
 		this.Type = Type_;
 	});
-	UnmarshalError = $pkg.UnmarshalError = $newType(8, $kindString, "xml.UnmarshalError", "UnmarshalError", "encoding/xml", null);
-	Unmarshaler = $pkg.Unmarshaler = $newType(8, $kindInterface, "xml.Unmarshaler", "Unmarshaler", "encoding/xml", null);
-	UnmarshalerAttr = $pkg.UnmarshalerAttr = $newType(8, $kindInterface, "xml.UnmarshalerAttr", "UnmarshalerAttr", "encoding/xml", null);
-	typeInfo = $pkg.typeInfo = $newType(0, $kindStruct, "xml.typeInfo", "typeInfo", "encoding/xml", function(xmlname_, fields_) {
+	UnmarshalError = $pkg.UnmarshalError = $newType(8, $kindString, "xml.UnmarshalError", true, "encoding/xml", true, null);
+	Unmarshaler = $pkg.Unmarshaler = $newType(8, $kindInterface, "xml.Unmarshaler", true, "encoding/xml", true, null);
+	UnmarshalerAttr = $pkg.UnmarshalerAttr = $newType(8, $kindInterface, "xml.UnmarshalerAttr", true, "encoding/xml", true, null);
+	typeInfo = $pkg.typeInfo = $newType(0, $kindStruct, "xml.typeInfo", true, "encoding/xml", false, function(xmlname_, fields_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.xmlname = ptrType$8.nil;
@@ -20224,7 +20206,7 @@ $packages["encoding/xml"] = (function() {
 		this.xmlname = xmlname_;
 		this.fields = fields_;
 	});
-	fieldInfo = $pkg.fieldInfo = $newType(0, $kindStruct, "xml.fieldInfo", "fieldInfo", "encoding/xml", function(idx_, name_, xmlns_, flags_, parents_) {
+	fieldInfo = $pkg.fieldInfo = $newType(0, $kindStruct, "xml.fieldInfo", true, "encoding/xml", false, function(idx_, name_, xmlns_, flags_, parents_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.idx = sliceType$8.nil;
@@ -20240,8 +20222,8 @@ $packages["encoding/xml"] = (function() {
 		this.flags = flags_;
 		this.parents = parents_;
 	});
-	fieldFlags = $pkg.fieldFlags = $newType(4, $kindInt, "xml.fieldFlags", "fieldFlags", "encoding/xml", null);
-	TagPathError = $pkg.TagPathError = $newType(0, $kindStruct, "xml.TagPathError", "TagPathError", "encoding/xml", function(Struct_, Field1_, Tag1_, Field2_, Tag2_) {
+	fieldFlags = $pkg.fieldFlags = $newType(4, $kindInt, "xml.fieldFlags", true, "encoding/xml", false, null);
+	TagPathError = $pkg.TagPathError = $newType(0, $kindStruct, "xml.TagPathError", true, "encoding/xml", true, function(Struct_, Field1_, Tag1_, Field2_, Tag2_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Struct = $ifaceNil;
@@ -20257,7 +20239,7 @@ $packages["encoding/xml"] = (function() {
 		this.Field2 = Field2_;
 		this.Tag2 = Tag2_;
 	});
-	SyntaxError = $pkg.SyntaxError = $newType(0, $kindStruct, "xml.SyntaxError", "SyntaxError", "encoding/xml", function(Msg_, Line_) {
+	SyntaxError = $pkg.SyntaxError = $newType(0, $kindStruct, "xml.SyntaxError", true, "encoding/xml", true, function(Msg_, Line_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Msg = "";
@@ -20267,7 +20249,7 @@ $packages["encoding/xml"] = (function() {
 		this.Msg = Msg_;
 		this.Line = Line_;
 	});
-	Name = $pkg.Name = $newType(0, $kindStruct, "xml.Name", "Name", "encoding/xml", function(Space_, Local_) {
+	Name = $pkg.Name = $newType(0, $kindStruct, "xml.Name", true, "encoding/xml", true, function(Space_, Local_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Space = "";
@@ -20277,7 +20259,7 @@ $packages["encoding/xml"] = (function() {
 		this.Space = Space_;
 		this.Local = Local_;
 	});
-	Attr = $pkg.Attr = $newType(0, $kindStruct, "xml.Attr", "Attr", "encoding/xml", function(Name_, Value_) {
+	Attr = $pkg.Attr = $newType(0, $kindStruct, "xml.Attr", true, "encoding/xml", true, function(Name_, Value_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Name = new Name.ptr("", "");
@@ -20287,8 +20269,8 @@ $packages["encoding/xml"] = (function() {
 		this.Name = Name_;
 		this.Value = Value_;
 	});
-	Token = $pkg.Token = $newType(8, $kindInterface, "xml.Token", "Token", "encoding/xml", null);
-	StartElement = $pkg.StartElement = $newType(0, $kindStruct, "xml.StartElement", "StartElement", "encoding/xml", function(Name_, Attr_) {
+	Token = $pkg.Token = $newType(8, $kindInterface, "xml.Token", true, "encoding/xml", true, null);
+	StartElement = $pkg.StartElement = $newType(0, $kindStruct, "xml.StartElement", true, "encoding/xml", true, function(Name_, Attr_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Name = new Name.ptr("", "");
@@ -20298,7 +20280,7 @@ $packages["encoding/xml"] = (function() {
 		this.Name = Name_;
 		this.Attr = Attr_;
 	});
-	EndElement = $pkg.EndElement = $newType(0, $kindStruct, "xml.EndElement", "EndElement", "encoding/xml", function(Name_) {
+	EndElement = $pkg.EndElement = $newType(0, $kindStruct, "xml.EndElement", true, "encoding/xml", true, function(Name_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Name = new Name.ptr("", "");
@@ -20306,9 +20288,9 @@ $packages["encoding/xml"] = (function() {
 		}
 		this.Name = Name_;
 	});
-	CharData = $pkg.CharData = $newType(12, $kindSlice, "xml.CharData", "CharData", "encoding/xml", null);
-	Comment = $pkg.Comment = $newType(12, $kindSlice, "xml.Comment", "Comment", "encoding/xml", null);
-	ProcInst = $pkg.ProcInst = $newType(0, $kindStruct, "xml.ProcInst", "ProcInst", "encoding/xml", function(Target_, Inst_) {
+	CharData = $pkg.CharData = $newType(12, $kindSlice, "xml.CharData", true, "encoding/xml", true, null);
+	Comment = $pkg.Comment = $newType(12, $kindSlice, "xml.Comment", true, "encoding/xml", true, null);
+	ProcInst = $pkg.ProcInst = $newType(0, $kindStruct, "xml.ProcInst", true, "encoding/xml", true, function(Target_, Inst_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Target = "";
@@ -20318,8 +20300,8 @@ $packages["encoding/xml"] = (function() {
 		this.Target = Target_;
 		this.Inst = Inst_;
 	});
-	Directive = $pkg.Directive = $newType(12, $kindSlice, "xml.Directive", "Directive", "encoding/xml", null);
-	Decoder = $pkg.Decoder = $newType(0, $kindStruct, "xml.Decoder", "Decoder", "encoding/xml", function(Strict_, AutoClose_, Entity_, CharsetReader_, DefaultSpace_, r_, buf_, saved_, stk_, free_, needClose_, toClose_, nextToken_, nextByte_, ns_, err_, line_, offset_, unmarshalDepth_) {
+	Directive = $pkg.Directive = $newType(12, $kindSlice, "xml.Directive", true, "encoding/xml", true, null);
+	Decoder = $pkg.Decoder = $newType(0, $kindStruct, "xml.Decoder", true, "encoding/xml", true, function(Strict_, AutoClose_, Entity_, CharsetReader_, DefaultSpace_, r_, buf_, saved_, stk_, free_, needClose_, toClose_, nextToken_, nextByte_, ns_, err_, line_, offset_, unmarshalDepth_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Strict = false;
@@ -20363,7 +20345,7 @@ $packages["encoding/xml"] = (function() {
 		this.offset = offset_;
 		this.unmarshalDepth = unmarshalDepth_;
 	});
-	stack = $pkg.stack = $newType(0, $kindStruct, "xml.stack", "stack", "encoding/xml", function(next_, kind_, name_, ok_) {
+	stack = $pkg.stack = $newType(0, $kindStruct, "xml.stack", true, "encoding/xml", false, function(next_, kind_, name_, ok_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.next = ptrType$14.nil;
@@ -24914,8 +24896,8 @@ $packages["regexp/syntax"] = (function() {
 	strings = $packages["strings"];
 	unicode = $packages["unicode"];
 	utf8 = $packages["unicode/utf8"];
-	patchList = $pkg.patchList = $newType(4, $kindUint32, "syntax.patchList", "patchList", "regexp/syntax", null);
-	frag = $pkg.frag = $newType(0, $kindStruct, "syntax.frag", "frag", "regexp/syntax", function(i_, out_) {
+	patchList = $pkg.patchList = $newType(4, $kindUint32, "syntax.patchList", true, "regexp/syntax", false, null);
+	frag = $pkg.frag = $newType(0, $kindStruct, "syntax.frag", true, "regexp/syntax", false, function(i_, out_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.i = 0;
@@ -24925,7 +24907,7 @@ $packages["regexp/syntax"] = (function() {
 		this.i = i_;
 		this.out = out_;
 	});
-	compiler = $pkg.compiler = $newType(0, $kindStruct, "syntax.compiler", "compiler", "regexp/syntax", function(p_) {
+	compiler = $pkg.compiler = $newType(0, $kindStruct, "syntax.compiler", true, "regexp/syntax", false, function(p_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.p = ptrType.nil;
@@ -24933,7 +24915,7 @@ $packages["regexp/syntax"] = (function() {
 		}
 		this.p = p_;
 	});
-	Error = $pkg.Error = $newType(0, $kindStruct, "syntax.Error", "Error", "regexp/syntax", function(Code_, Expr_) {
+	Error = $pkg.Error = $newType(0, $kindStruct, "syntax.Error", true, "regexp/syntax", true, function(Code_, Expr_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Code = "";
@@ -24943,9 +24925,9 @@ $packages["regexp/syntax"] = (function() {
 		this.Code = Code_;
 		this.Expr = Expr_;
 	});
-	ErrorCode = $pkg.ErrorCode = $newType(8, $kindString, "syntax.ErrorCode", "ErrorCode", "regexp/syntax", null);
-	Flags = $pkg.Flags = $newType(2, $kindUint16, "syntax.Flags", "Flags", "regexp/syntax", null);
-	parser = $pkg.parser = $newType(0, $kindStruct, "syntax.parser", "parser", "regexp/syntax", function(flags_, stack_, free_, numCap_, wholeRegexp_, tmpClass_) {
+	ErrorCode = $pkg.ErrorCode = $newType(8, $kindString, "syntax.ErrorCode", true, "regexp/syntax", true, null);
+	Flags = $pkg.Flags = $newType(2, $kindUint16, "syntax.Flags", true, "regexp/syntax", true, null);
+	parser = $pkg.parser = $newType(0, $kindStruct, "syntax.parser", true, "regexp/syntax", false, function(flags_, stack_, free_, numCap_, wholeRegexp_, tmpClass_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.flags = 0;
@@ -24963,7 +24945,7 @@ $packages["regexp/syntax"] = (function() {
 		this.wholeRegexp = wholeRegexp_;
 		this.tmpClass = tmpClass_;
 	});
-	charGroup = $pkg.charGroup = $newType(0, $kindStruct, "syntax.charGroup", "charGroup", "regexp/syntax", function(sign_, class$1_) {
+	charGroup = $pkg.charGroup = $newType(0, $kindStruct, "syntax.charGroup", true, "regexp/syntax", false, function(sign_, class$1_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.sign = 0;
@@ -24973,7 +24955,7 @@ $packages["regexp/syntax"] = (function() {
 		this.sign = sign_;
 		this.class$1 = class$1_;
 	});
-	ranges = $pkg.ranges = $newType(0, $kindStruct, "syntax.ranges", "ranges", "regexp/syntax", function(p_) {
+	ranges = $pkg.ranges = $newType(0, $kindStruct, "syntax.ranges", true, "regexp/syntax", false, function(p_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.p = ptrType$2.nil;
@@ -24981,7 +24963,7 @@ $packages["regexp/syntax"] = (function() {
 		}
 		this.p = p_;
 	});
-	Prog = $pkg.Prog = $newType(0, $kindStruct, "syntax.Prog", "Prog", "regexp/syntax", function(Inst_, Start_, NumCap_) {
+	Prog = $pkg.Prog = $newType(0, $kindStruct, "syntax.Prog", true, "regexp/syntax", true, function(Inst_, Start_, NumCap_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Inst = sliceType$4.nil;
@@ -24993,9 +24975,9 @@ $packages["regexp/syntax"] = (function() {
 		this.Start = Start_;
 		this.NumCap = NumCap_;
 	});
-	InstOp = $pkg.InstOp = $newType(1, $kindUint8, "syntax.InstOp", "InstOp", "regexp/syntax", null);
-	EmptyOp = $pkg.EmptyOp = $newType(1, $kindUint8, "syntax.EmptyOp", "EmptyOp", "regexp/syntax", null);
-	Inst = $pkg.Inst = $newType(0, $kindStruct, "syntax.Inst", "Inst", "regexp/syntax", function(Op_, Out_, Arg_, Rune_) {
+	InstOp = $pkg.InstOp = $newType(1, $kindUint8, "syntax.InstOp", true, "regexp/syntax", true, null);
+	EmptyOp = $pkg.EmptyOp = $newType(1, $kindUint8, "syntax.EmptyOp", true, "regexp/syntax", true, null);
+	Inst = $pkg.Inst = $newType(0, $kindStruct, "syntax.Inst", true, "regexp/syntax", true, function(Op_, Out_, Arg_, Rune_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Op = 0;
@@ -25009,7 +24991,7 @@ $packages["regexp/syntax"] = (function() {
 		this.Arg = Arg_;
 		this.Rune = Rune_;
 	});
-	Regexp = $pkg.Regexp = $newType(0, $kindStruct, "syntax.Regexp", "Regexp", "regexp/syntax", function(Op_, Flags_, Sub_, Sub0_, Rune_, Rune0_, Min_, Max_, Cap_, Name_) {
+	Regexp = $pkg.Regexp = $newType(0, $kindStruct, "syntax.Regexp", true, "regexp/syntax", true, function(Op_, Flags_, Sub_, Sub0_, Rune_, Rune0_, Min_, Max_, Cap_, Name_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Op = 0;
@@ -25035,7 +25017,7 @@ $packages["regexp/syntax"] = (function() {
 		this.Cap = Cap_;
 		this.Name = Name_;
 	});
-	Op = $pkg.Op = $newType(1, $kindUint8, "syntax.Op", "Op", "regexp/syntax", null);
+	Op = $pkg.Op = $newType(1, $kindUint8, "syntax.Op", true, "regexp/syntax", true, null);
 	sliceType = $sliceType($Int32);
 	sliceType$1 = $sliceType(unicode.Range16);
 	sliceType$2 = $sliceType(unicode.Range32);
@@ -28301,7 +28283,7 @@ $packages["regexp"] = (function() {
 	strings = $packages["strings"];
 	unicode = $packages["unicode"];
 	utf8 = $packages["unicode/utf8"];
-	job = $pkg.job = $newType(0, $kindStruct, "regexp.job", "job", "regexp", function(pc_, arg_, pos_) {
+	job = $pkg.job = $newType(0, $kindStruct, "regexp.job", true, "regexp", false, function(pc_, arg_, pos_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.pc = 0;
@@ -28313,7 +28295,7 @@ $packages["regexp"] = (function() {
 		this.arg = arg_;
 		this.pos = pos_;
 	});
-	bitState = $pkg.bitState = $newType(0, $kindStruct, "regexp.bitState", "bitState", "regexp", function(prog_, end_, cap_, jobs_, visited_) {
+	bitState = $pkg.bitState = $newType(0, $kindStruct, "regexp.bitState", true, "regexp", false, function(prog_, end_, cap_, jobs_, visited_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.prog = ptrType$2.nil;
@@ -28329,7 +28311,7 @@ $packages["regexp"] = (function() {
 		this.jobs = jobs_;
 		this.visited = visited_;
 	});
-	queue = $pkg.queue = $newType(0, $kindStruct, "regexp.queue", "queue", "regexp", function(sparse_, dense_) {
+	queue = $pkg.queue = $newType(0, $kindStruct, "regexp.queue", true, "regexp", false, function(sparse_, dense_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.sparse = sliceType$2.nil;
@@ -28339,7 +28321,7 @@ $packages["regexp"] = (function() {
 		this.sparse = sparse_;
 		this.dense = dense_;
 	});
-	entry = $pkg.entry = $newType(0, $kindStruct, "regexp.entry", "entry", "regexp", function(pc_, t_) {
+	entry = $pkg.entry = $newType(0, $kindStruct, "regexp.entry", true, "regexp", false, function(pc_, t_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.pc = 0;
@@ -28349,7 +28331,7 @@ $packages["regexp"] = (function() {
 		this.pc = pc_;
 		this.t = t_;
 	});
-	thread = $pkg.thread = $newType(0, $kindStruct, "regexp.thread", "thread", "regexp", function(inst_, cap_) {
+	thread = $pkg.thread = $newType(0, $kindStruct, "regexp.thread", true, "regexp", false, function(inst_, cap_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.inst = ptrType$5.nil;
@@ -28359,7 +28341,7 @@ $packages["regexp"] = (function() {
 		this.inst = inst_;
 		this.cap = cap_;
 	});
-	machine = $pkg.machine = $newType(0, $kindStruct, "regexp.machine", "machine", "regexp", function(re_, p_, op_, maxBitStateLen_, b_, q0_, q1_, pool_, matched_, matchcap_, inputBytes_, inputString_, inputReader_) {
+	machine = $pkg.machine = $newType(0, $kindStruct, "regexp.machine", true, "regexp", false, function(re_, p_, op_, maxBitStateLen_, b_, q0_, q1_, pool_, matched_, matchcap_, inputBytes_, inputString_, inputReader_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.re = ptrType$3.nil;
@@ -28391,7 +28373,7 @@ $packages["regexp"] = (function() {
 		this.inputString = inputString_;
 		this.inputReader = inputReader_;
 	});
-	onePassProg = $pkg.onePassProg = $newType(0, $kindStruct, "regexp.onePassProg", "onePassProg", "regexp", function(Inst_, Start_, NumCap_) {
+	onePassProg = $pkg.onePassProg = $newType(0, $kindStruct, "regexp.onePassProg", true, "regexp", false, function(Inst_, Start_, NumCap_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Inst = sliceType$7.nil;
@@ -28403,7 +28385,7 @@ $packages["regexp"] = (function() {
 		this.Start = Start_;
 		this.NumCap = NumCap_;
 	});
-	onePassInst = $pkg.onePassInst = $newType(0, $kindStruct, "regexp.onePassInst", "onePassInst", "regexp", function(Inst_, Next_) {
+	onePassInst = $pkg.onePassInst = $newType(0, $kindStruct, "regexp.onePassInst", true, "regexp", false, function(Inst_, Next_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Inst = new syntax.Inst.ptr(0, 0, 0, sliceType$1.nil);
@@ -28413,7 +28395,7 @@ $packages["regexp"] = (function() {
 		this.Inst = Inst_;
 		this.Next = Next_;
 	});
-	queueOnePass = $pkg.queueOnePass = $newType(0, $kindStruct, "regexp.queueOnePass", "queueOnePass", "regexp", function(sparse_, dense_, size_, nextIndex_) {
+	queueOnePass = $pkg.queueOnePass = $newType(0, $kindStruct, "regexp.queueOnePass", true, "regexp", false, function(sparse_, dense_, size_, nextIndex_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.sparse = sliceType$2.nil;
@@ -28427,8 +28409,8 @@ $packages["regexp"] = (function() {
 		this.size = size_;
 		this.nextIndex = nextIndex_;
 	});
-	runeSlice = $pkg.runeSlice = $newType(12, $kindSlice, "regexp.runeSlice", "runeSlice", "regexp", null);
-	Regexp = $pkg.Regexp = $newType(0, $kindStruct, "regexp.Regexp", "Regexp", "regexp", function(regexpRO_, mu_, machine_) {
+	runeSlice = $pkg.runeSlice = $newType(12, $kindSlice, "regexp.runeSlice", true, "regexp", false, null);
+	Regexp = $pkg.Regexp = $newType(0, $kindStruct, "regexp.Regexp", true, "regexp", true, function(regexpRO_, mu_, machine_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.regexpRO = new regexpRO.ptr("", ptrType$2.nil, ptrType$1.nil, "", sliceType$3.nil, false, 0, 0, 0, 0, sliceType$9.nil, false);
@@ -28440,7 +28422,7 @@ $packages["regexp"] = (function() {
 		this.mu = mu_;
 		this.machine = machine_;
 	});
-	regexpRO = $pkg.regexpRO = $newType(0, $kindStruct, "regexp.regexpRO", "regexpRO", "regexp", function(expr_, prog_, onepass_, prefix_, prefixBytes_, prefixComplete_, prefixRune_, prefixEnd_, cond_, numSubexp_, subexpNames_, longest_) {
+	regexpRO = $pkg.regexpRO = $newType(0, $kindStruct, "regexp.regexpRO", true, "regexp", false, function(expr_, prog_, onepass_, prefix_, prefixBytes_, prefixComplete_, prefixRune_, prefixEnd_, cond_, numSubexp_, subexpNames_, longest_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.expr = "";
@@ -28470,8 +28452,8 @@ $packages["regexp"] = (function() {
 		this.subexpNames = subexpNames_;
 		this.longest = longest_;
 	});
-	input = $pkg.input = $newType(8, $kindInterface, "regexp.input", "input", "regexp", null);
-	inputString = $pkg.inputString = $newType(0, $kindStruct, "regexp.inputString", "inputString", "regexp", function(str_) {
+	input = $pkg.input = $newType(8, $kindInterface, "regexp.input", true, "regexp", false, null);
+	inputString = $pkg.inputString = $newType(0, $kindStruct, "regexp.inputString", true, "regexp", false, function(str_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.str = "";
@@ -28479,7 +28461,7 @@ $packages["regexp"] = (function() {
 		}
 		this.str = str_;
 	});
-	inputBytes = $pkg.inputBytes = $newType(0, $kindStruct, "regexp.inputBytes", "inputBytes", "regexp", function(str_) {
+	inputBytes = $pkg.inputBytes = $newType(0, $kindStruct, "regexp.inputBytes", true, "regexp", false, function(str_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.str = sliceType$3.nil;
@@ -28487,7 +28469,7 @@ $packages["regexp"] = (function() {
 		}
 		this.str = str_;
 	});
-	inputReader = $pkg.inputReader = $newType(0, $kindStruct, "regexp.inputReader", "inputReader", "regexp", function(r_, atEOT_, pos_) {
+	inputReader = $pkg.inputReader = $newType(0, $kindStruct, "regexp.inputReader", true, "regexp", false, function(r_, atEOT_, pos_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.r = $ifaceNil;
@@ -31115,7 +31097,7 @@ $packages["github.com/caltechlibrary/tok"] = (function() {
 	xml = $packages["encoding/xml"];
 	fmt = $packages["fmt"];
 	regexp = $packages["regexp"];
-	Token = $pkg.Token = $newType(0, $kindStruct, "tok.Token", "Token", "github.com/caltechlibrary/tok", function(XMLName_, Type_, Value_) {
+	Token = $pkg.Token = $newType(0, $kindStruct, "tok.Token", true, "github.com/caltechlibrary/tok", true, function(XMLName_, Type_, Value_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.XMLName = new xml.Name.ptr("", "");
@@ -31372,7 +31354,7 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 	tok = $packages["github.com/caltechlibrary/tok"];
 	sort = $packages["sort"];
 	strings = $packages["strings"];
-	Element = $pkg.Element = $newType(0, $kindStruct, "bibtex.Element", "Element", "github.com/caltechlibrary/bibtex", function(XMLName_, Type_, Keys_, Tags_) {
+	Element = $pkg.Element = $newType(0, $kindStruct, "bibtex.Element", true, "github.com/caltechlibrary/bibtex", true, function(XMLName_, Type_, Keys_, Tags_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.XMLName = new xml.Name.ptr("", "");
@@ -31386,7 +31368,7 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 		this.Keys = Keys_;
 		this.Tags = Tags_;
 	});
-	ByKey = $pkg.ByKey = $newType(12, $kindSlice, "bibtex.ByKey", "ByKey", "github.com/caltechlibrary/bibtex", null);
+	ByKey = $pkg.ByKey = $newType(12, $kindSlice, "bibtex.ByKey", true, "github.com/caltechlibrary/bibtex", true, null);
 	sliceType = $sliceType($String);
 	sliceType$1 = $sliceType($emptyInterface);
 	sliceType$2 = $sliceType($Uint8);
@@ -31987,7 +31969,7 @@ $packages["github.com/caltechlibrary/bibtex/webapp"] = (function() {
 	scrape = $packages["github.com/caltechlibrary/bibtex/scrape"];
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	strings = $packages["strings"];
-	BibTeX = $pkg.BibTeX = $newType(0, $kindStruct, "main.BibTeX", "BibTeX", "github.com/caltechlibrary/bibtex/webapp", function() {
+	BibTeX = $pkg.BibTeX = $newType(0, $kindStruct, "main.BibTeX", true, "github.com/caltechlibrary/bibtex/webapp", true, function() {
 		this.$val = this;
 		if (arguments.length === 0) {
 			return;
