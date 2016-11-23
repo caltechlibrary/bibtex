@@ -32,7 +32,7 @@ import (
 
 const (
 	// Version of BibTeX package
-	Version = "v0.0.7"
+	Version = "v0.0.8"
 
 	// DefaultInclude list
 	DefaultInclude = "comment,string,article,book,booklet,inbook,incollection,inproceedings,conference,manual,masterthesis,misc,phdthesis,proceedings,techreport,unpublished"
@@ -125,6 +125,22 @@ var (
 		},
 	}
 )
+
+// Set adds/updates an attribute (e.g. author, title, year) to an element
+func (element *Element) Set(key, value string) bool {
+	if strings.Compare(key, "type") == 0 {
+		element.Type = value
+		return true
+	}
+	if _, ok := element.Tags[key]; ok == true {
+		element.Tags[key] = value
+		return true
+	}
+	element.Keys = append(element.Keys, key)
+	element.Tags[key] = value
+	_, ok := element.Tags[key]
+	return ok
+}
 
 // Render a single BibTeX element
 func (element *Element) String() string {
