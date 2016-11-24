@@ -132,6 +132,9 @@ func (element *Element) Set(key, value string) bool {
 		element.Type = value
 		return true
 	}
+	if element.Tags == nil {
+		element.Tags = make(map[string]string)
+	}
 	if _, ok := element.Tags[key]; ok == true {
 		element.Tags[key] = value
 		return true
