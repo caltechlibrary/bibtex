@@ -32092,16 +32092,18 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 	tok = $packages["github.com/caltechlibrary/tok"];
 	sort = $packages["sort"];
 	strings = $packages["strings"];
-	Element = $pkg.Element = $newType(0, $kindStruct, "bibtex.Element", true, "github.com/caltechlibrary/bibtex", true, function(XMLName_, Type_, Keys_, Tags_) {
+	Element = $pkg.Element = $newType(0, $kindStruct, "bibtex.Element", true, "github.com/caltechlibrary/bibtex", true, function(XMLName_, ID_, Type_, Keys_, Tags_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.XMLName = new xml.Name.ptr("", "");
+			this.ID = "";
 			this.Type = "";
 			this.Keys = sliceType.nil;
 			this.Tags = false;
 			return;
 		}
 		this.XMLName = XMLName_;
+		this.ID = ID_;
 		this.Type = Type_;
 		this.Keys = Keys_;
 		this.Tags = Tags_;
@@ -32117,9 +32119,16 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 	Element.ptr.prototype.Set = function(key, value) {
 		var $ptr, _entry, _entry$1, _key, _key$1, _tuple, _tuple$1, element, key, ok, ok$1, value;
 		element = this;
+		if ((strings.Compare(key, "ID") === 0) || (strings.Compare(key, "id") === 0)) {
+			element.ID = value;
+			return true;
+		}
 		if (strings.Compare(key, "type") === 0) {
 			element.Type = value;
 			return true;
+		}
+		if (element.Tags === false) {
+			element.Tags = {};
 		}
 		_tuple = (_entry = element.Tags[$String.keyFor(key)], _entry !== undefined ? [_entry.v, true] : ["", false]);
 		ok = _tuple[1];
@@ -32135,66 +32144,53 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 	};
 	Element.prototype.Set = function(key, value) { return this.$val.Set(key, value); };
 	Element.ptr.prototype.String = function() {
-		var $ptr, _entry, _i, _i$1, _keys, _r, _r$1, _r$2, _r$3, _r$4, _ref, _ref$1, element, i, ky, ky$1, out, val, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _i = $f._i; _i$1 = $f._i$1; _keys = $f._keys; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _ref = $f._ref; _ref$1 = $f._ref$1; element = $f.element; i = $f.i; ky = $f.ky; ky$1 = $f.ky$1; out = $f.out; val = $f.val; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _entry, _i, _keys, _r, _r$1, _r$2, _r$3, _r$4, _ref, element, ky, out, val, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _i = $f._i; _keys = $f._keys; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _ref = $f._ref; element = $f.element; ky = $f.ky; out = $f.out; val = $f.val; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		element = this;
 		out = sliceType.nil;
-		_r = fmt.Sprintf("@%s{", new sliceType$1([new $String(element.Type)])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		out = $append(out, _r);
-		/* */ if (element.Keys.$length > 0) { $s = 2; continue; }
-		/* */ $s = 3; continue;
-		/* if (element.Keys.$length > 0) { */ case 2:
-			_ref = element.Keys;
+		/* */ if (element.ID.length > 0) { $s = 1; continue; }
+		/* */ $s = 2; continue;
+		/* if (element.ID.length > 0) { */ case 1:
+			_r = fmt.Sprintf("@%s{%s,\n", new sliceType$1([new $String(element.Type), new $String(element.ID)])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			out = $append(out, _r);
+			$s = 3; continue;
+		/* } else { */ case 2:
+			_r$1 = fmt.Sprintf("@%s{\n", new sliceType$1([new $String(element.Type)])); /* */ $s = 5; case 5: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			out = $append(out, _r$1);
+		/* } */ case 3:
+		/* */ if ($keys(element.Tags).length > 0) { $s = 6; continue; }
+		/* */ $s = 7; continue;
+		/* if ($keys(element.Tags).length > 0) { */ case 6:
+			_ref = element.Tags;
 			_i = 0;
-			/* while (true) { */ case 5:
-				/* if (!(_i < _ref.$length)) { break; } */ if(!(_i < _ref.$length)) { $s = 6; continue; }
-				i = _i;
-				ky = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
-				/* */ if (ky.length > 0) { $s = 7; continue; }
-				/* */ $s = 8; continue;
-				/* if (ky.length > 0) { */ case 7:
-					/* */ if (i === 0) { $s = 9; continue; }
-					/* */ $s = 10; continue;
-					/* if (i === 0) { */ case 9:
-						_r$1 = fmt.Sprintf("%s,\n", new sliceType$1([new $String(ky)])); /* */ $s = 12; case 12: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
-						out = $append(out, _r$1);
-						$s = 11; continue;
-					/* } else { */ case 10:
-						_r$2 = fmt.Sprintf("    %s,\n", new sliceType$1([new $String(ky)])); /* */ $s = 13; case 13: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
-						out = $append(out, _r$2);
-					/* } */ case 11:
-				/* } */ case 8:
-				_i++;
-			/* } */ $s = 5; continue; case 6:
-			$s = 4; continue;
-		/* } else { */ case 3:
-			out = $append(out, "\n");
-		/* } */ case 4:
-		/* */ if ($keys(element.Tags).length > 0) { $s = 14; continue; }
-		/* */ $s = 15; continue;
-		/* if ($keys(element.Tags).length > 0) { */ case 14:
-			_ref$1 = element.Tags;
-			_i$1 = 0;
-			_keys = $keys(_ref$1);
-			/* while (true) { */ case 16:
-				/* if (!(_i$1 < _keys.length)) { break; } */ if(!(_i$1 < _keys.length)) { $s = 17; continue; }
-				_entry = _ref$1[_keys[_i$1]];
+			_keys = $keys(_ref);
+			/* while (true) { */ case 8:
+				/* if (!(_i < _keys.length)) { break; } */ if(!(_i < _keys.length)) { $s = 9; continue; }
+				_entry = _ref[_keys[_i]];
 				if (_entry === undefined) {
-					_i$1++;
-					/* continue; */ $s = 16; continue;
+					_i++;
+					/* continue; */ $s = 8; continue;
 				}
-				ky$1 = _entry.k;
+				ky = _entry.k;
 				val = _entry.v;
-				_r$3 = fmt.Sprintf("    %s = %s,\n", new sliceType$1([new $String(ky$1), new $String(val)])); /* */ $s = 18; case 18: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
-				out = $append(out, _r$3);
-				_i$1++;
-			/* } */ $s = 16; continue; case 17:
-		/* } */ case 15:
-		_r$4 = fmt.Sprintf("}\n", new sliceType$1([])); /* */ $s = 19; case 19: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+				/* */ if (!((val.length === 0))) { $s = 10; continue; }
+				/* */ $s = 11; continue;
+				/* if (!((val.length === 0))) { */ case 10:
+					_r$2 = fmt.Sprintf("    %s = %q,\n", new sliceType$1([new $String(ky), new $String(val)])); /* */ $s = 13; case 13: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+					out = $append(out, _r$2);
+					$s = 12; continue;
+				/* } else { */ case 11:
+					_r$3 = fmt.Sprintf("    %q,\n", new sliceType$1([new $String(ky)])); /* */ $s = 14; case 14: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+					out = $append(out, _r$3);
+				/* } */ case 12:
+				_i++;
+			/* } */ $s = 8; continue; case 9:
+		/* } */ case 7:
+		_r$4 = fmt.Sprintf("}\n", new sliceType$1([])); /* */ $s = 15; case 15: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
 		out = $append(out, _r$4);
 		$s = -1; return strings.Join(out, "");
 		return strings.Join(out, "");
-		/* */ } return; } if ($f === undefined) { $f = { $blk: Element.ptr.prototype.String }; } $f.$ptr = $ptr; $f._entry = _entry; $f._i = _i; $f._i$1 = _i$1; $f._keys = _keys; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._ref = _ref; $f._ref$1 = _ref$1; $f.element = element; $f.i = i; $f.ky = ky; $f.ky$1 = ky$1; $f.out = out; $f.val = val; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Element.ptr.prototype.String }; } $f.$ptr = $ptr; $f._entry = _entry; $f._i = _i; $f._keys = _keys; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._ref = _ref; $f.element = element; $f.ky = ky; $f.out = out; $f.val = val; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Element.prototype.String = function() { return this.$val.String(); };
 	Bib = function(token, buf) {
@@ -32247,7 +32243,7 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 		err = $ifaceNil;
 		keys = sliceType.nil;
 		tags = false;
-		element = new Element.ptr(new xml.Name.ptr("", ""), "", sliceType.nil, false);
+		element = new Element.ptr(new xml.Name.ptr("", ""), "", "", sliceType.nil, false);
 		element.Type = elementType;
 		tags = {};
 		/* while (true) { */ case 1:
@@ -32607,7 +32603,7 @@ $packages["github.com/caltechlibrary/bibtex"] = (function() {
 	$pkg.Exclusive = Exclusive;
 	ptrType$3.methods = [{prop: "Set", name: "Set", pkg: "", typ: $funcType([$String, $String], [$Bool], false)}, {prop: "String", name: "String", pkg: "", typ: $funcType([], [$String], false)}];
 	ByKey.methods = [{prop: "Len", name: "Len", pkg: "", typ: $funcType([], [$Int], false)}, {prop: "Swap", name: "Swap", pkg: "", typ: $funcType([$Int, $Int], [], false)}, {prop: "Less", name: "Less", pkg: "", typ: $funcType([$Int, $Int], [$Bool], false)}];
-	Element.init("", [{prop: "XMLName", name: "XMLName", exported: true, typ: xml.Name, tag: "json:\"-\""}, {prop: "Type", name: "Type", exported: true, typ: $String, tag: "xml:\"type\" json:\"type\""}, {prop: "Keys", name: "Keys", exported: true, typ: sliceType, tag: "xml:\"keys\" json:\"keys\""}, {prop: "Tags", name: "Tags", exported: true, typ: mapType$1, tag: "xml:\"tags\" json:\"tags\""}]);
+	Element.init("", [{prop: "XMLName", name: "XMLName", exported: true, typ: xml.Name, tag: "json:\"-\""}, {prop: "ID", name: "ID", exported: true, typ: $String, tag: "xml:\"id\" json:\"id\""}, {prop: "Type", name: "Type", exported: true, typ: $String, tag: "xml:\"type\" json:\"type\""}, {prop: "Keys", name: "Keys", exported: true, typ: sliceType, tag: "xml:\"keys\" json:\"keys\""}, {prop: "Tags", name: "Tags", exported: true, typ: mapType$1, tag: "xml:\"tags\" json:\"tags\""}]);
 	ByKey.init($String);
 	$init = function() {
 		$pkg.$init = function() {};
