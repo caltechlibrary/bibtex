@@ -53,6 +53,7 @@ const (
 // Generic Element
 type Element struct {
 	XMLName xml.Name          `json:"-"`
+	ID      string            `xml:"id" json:"id"`
 	Type    string            `xml:"type" json:"type"`
 	Keys    []string          `xml:"keys" json:"keys"`
 	Tags    map[string]string `xml:"tags" json:"tags"`
@@ -128,6 +129,10 @@ var (
 
 // Set adds/updates an attribute (e.g. author, title, year) to an element
 func (element *Element) Set(key, value string) bool {
+	if strings.Compare(key, "ID") == 0 || strings.Compare(key, "id") == 0 {
+		element.ID = value
+		return true
+	}
 	if strings.Compare(key, "type") == 0 {
 		element.Type = value
 		return true
@@ -145,28 +150,38 @@ func (element *Element) Set(key, value string) bool {
 	return ok
 }
 
-// Render a single BibTeX element
+// String renders a single BibTeX element
 func (element *Element) String() string {
 	var out []string
 
-	out = append(out, fmt.Sprintf("@%s{", element.Type))
-	if len(element.Keys) > 0 {
-		for i, ky := range element.Keys {
-			if len(ky) > 0 {
-				if i == 0 {
-					out = append(out, fmt.Sprintf("%s,\n", ky))
-				} else {
-					out = append(out, fmt.Sprintf("    %s,\n", ky))
+	if len(element.ID) > 0 {
+		out = append(out, fmt.Sprintf("@%s{%s,\n", element.Type, element.ID))
+	} else {
+		out = append(out, fmt.Sprintf("@%s{\n", element.Type))
+	}
+	/*
+		if len(element.Keys) > 0 {
+			for i, ky := range element.Keys {
+				if len(ky) > 0 {
+					if i == 0 {
+						out = append(out, fmt.Sprintf("%s,\n", ky))
+					} else {
+						out = append(out, fmt.Sprintf("    %s,\n", ky))
+					}
 				}
 			}
+		} else {
+			out = append(out, "\n")
 		}
-	} else {
-		out = append(out, "\n")
-	}
+	*/
 
 	if len(element.Tags) > 0 {
 		for ky, val := range element.Tags {
-			out = append(out, fmt.Sprintf("    %s = %s,\n", ky, val))
+			if len(val) != 0 {
+				out = append(out, fmt.Sprintf("    %s = %q,\n", ky, val))
+			} else {
+				out = append(out, fmt.Sprintf("    %q,\n", ky))
+			}
 		}
 	}
 
