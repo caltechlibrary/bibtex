@@ -3,7 +3,7 @@
 
 ## Compiled version
 
-*bibfilter* is a command line program run from a shell like Bash. If you download the
+*bibfilter* is a command line program run from a shell like Bash. If you download the 
 repository a compiled version is in the dist directory. The compiled binary matching
 your computer type and operating system can be copied to a bin directory in your PATH.
 
@@ -65,4 +65,3 @@ or
     make test
     make install
 ```
-

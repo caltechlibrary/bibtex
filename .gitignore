@@ -24,9 +24,9 @@ _testmain.go
 *.prof
 
 # Project specific ignores
-*.zip
 .DS_Store
 *~
 *.swp
 bin/*
 dist/*
+*.zip
