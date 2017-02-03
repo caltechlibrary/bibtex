@@ -1,6 +1,6 @@
 
 + [Home](/)
-+ [bibtex](./)
++ [README](./)
 + [BibTeX web tools](./webapp/)
 + [INSTALL](./install.html)
 + [LICENSE](./license.html)
