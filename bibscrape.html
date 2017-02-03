@@ -30,24 +30,21 @@
 <pre><code>bibscrape [OPTIONS] FILENAME
 </code></pre>
 
-<p>Parse the plain text file for BibTeX entry making a best guess
-to generate pseudo bib entries that can import into JabRef for
-cleanup.</p>
+<h2>SYSNOPSIS</h2>
+
+<p>bibscrape parses a plain text file for BibTeX entry making a best guess to generate pseudo bib entries that can import into JabRef for clea</p>
 
 <h2>OPTIONS</h2>
 
-<pre><code>   -e Set the default entry separator (defaults to \n\n)
-   -h display help
-   -k add a missing key
-   -l display license
-   -t Set the entry type  (defaults to pseudo)
-   -v display version
+<pre><code>	-e	Set the default entry separator (defaults to \n\n)
+	-h	display help
+	-k	add a missing key
+	-l	display license
+	-t	Set the entry type  (defaults to pseudo)
+	-v	display version
 </code></pre>
 
-<h2>EXAMPLE</h2>
-
-<p>Use an 4 digit ID number and period to indicate the start of my bib
-records.</p>
+<h2>EXAMPLES</h2>
 
 <pre><code>    bibscrape -entry-separator &quot;[0-9][0-9]0-9][0-9]\.\n&quot; mytest.bib
 </code></pre>

@@ -27,19 +27,31 @@
 <section>
 <h1>USAGE</h1>
 
-<pre><code>bibmerge [OPTION] BIBFILE1 BIBFILE2
+<pre><code>bibmerge [OPTIONS] BIB_FILE1 BIB_FILE2
 </code></pre>
+
+<h2>SYNOPSIS</h2>
+
+<p>bibmerge will merge combine two BibTeX files via one of the following
+operations -diff, -exclusive, -intersect or -join.</p>
 
 <h2>OPTIONS</h2>
 
-<pre><code>    -diff take the difference (asymmetric) between two bib files
-    -exclusive generate a symmetric difference between two bib files
-    -h display help information
-    -intersect generate a bib listing from the intersection of two bib files
-    -join join two bib files
-    -l display license
-    -v display version information
+<pre><code>	-diff	take the difference (asymmetric) between two bib files
+	-exclusive	generate a symmetric difference between two bib files
+	-h	display help information
+	-intersect	generate a bib listing from the intersection of two bib files
+	-join	join two bib files
+	-l	display license
+	-v	display version information
 </code></pre>
+
+<h2>EXAMPLES</h2>
+
+<pre><code>    bibmerge -join my-old-articles.bib my-recent-articles.bib
+</code></pre>
+
+<p>Combine to BibTeX files into one using join.</p>
 
 </section>
 
