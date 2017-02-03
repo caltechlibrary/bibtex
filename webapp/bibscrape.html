@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Merge BibTeX files</title>
+    <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+    <header>
+    <a href="http://library.caltech.edu"><img src="../assets/liblogo.gif" alt="Caltech Library logo"></a>
+    </header>
+    <nav>
+    <ul>
+<li><a href="/">Home</a></li>
+<li><a href="../">bibtex</a></li>
+<li><a href="./">BibTeX web tools</a></li>
+<li><a href="../install.html">INSTALL</a></li>
+<li><a href="../license.html">LICENSE</a></li>
+<li><a href="https://github.com/caltechlibrary/bibtex">Github</a></li>
+</ul>
+
+    </nav>
+
+    <section>
+        <h2>Plain text to scrape</h2>
+        <div><label>Paste your citation list</label><br /><textarea id="input-source" cols="80", rows="30"></textarea></div>
+        <h2>How are the entries delimited?</h2>
+        <input type="text" id="entry-separator" name="entry-separator" value="" placeholder="e.g. \n\n or [0-9]+\.\n" size="80">
+        <h2>What type of entries are you scraping?</h2>
+        <select id='entry-type'>
+            <option value="article">article</option>
+            <option value="book">book</option>
+            <option value="booklet">booklet</option>
+            <option value="conference">conference</option>
+            <option value="inbook">inbook</option>
+            <option value="incollection">incollection</option>
+            <option value="inproceedings">inproceedings</option>
+            <option value="manual">manual</option>
+            <option value="masterthesis">masterthesis</option>
+            <option value="misc">misc</option>
+            <option value="phdthesis">phdthesis</option>
+            <option value="proceedings">proceedings</option>
+            <option value="textreport">textreport</option>
+            <option value="unpublished">unpublished</option>
+        </select>
+        <div><button id="scrape">Scrape</button></div>
+        <div><label>Copy the results</label><br /><textarea id="output-bibtex" readonly cols="80" rows="30"></textarea></div>
+        <div><label>Example command line usage</label><br /><input id="cmd-example-bibtex" type="text" readonly value="" size="80" /></div>
+    </section>
+    <footer>
+    <span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
+    <span>&copy; 2016 <a href="http://library.caltech.edu/CLS_Copyright.htm">Caltech library</a></span>
+    <address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address> 
+    <span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+    <span><a href="mailto:library@caltech.edu">Email Us</a></span>
+    </footer>
+    <script src="webapp.js"></script>
+    <script src="bibscrape.js"></script>
+</body>
+</html>

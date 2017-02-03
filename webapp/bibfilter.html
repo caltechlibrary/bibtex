@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Filter BibTeX entries by type</title>
+    <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+    <header>
+    <a href="http://library.caltech.edu"><img src="../assets/liblogo.gif" alt="Caltech Library logo"></a>
+    </header>
+    <nav>
+    <ul>
+<li><a href="/">Home</a></li>
+<li><a href="../">bibtex</a></li>
+<li><a href="./">BibTeX web tools</a></li>
+<li><a href="../install.html">INSTALL</a></li>
+<li><a href="../license.html">LICENSE</a></li>
+<li><a href="https://github.com/caltechlibrary/bibtex">Github</a></li>
+</ul>
+
+    </nav>
+
+    <section>
+        <h2>Filter BibTeX entries by type</h2>
+        <div><label>Paste your BibTeX</label><br /><textarea id="input-bibtex" cols="80", rows="30"></textarea></div>
+        <div><label>Include tags (comma separated)</label> <input id="include-bibtex" type="text" placeholder="If empty include all tags" size="80" /></div>
+        <div><label>Exclude tags (comma separated)</label> <input id="exclude-bibtex" type="text" placeholder="If empty do not exclude any tags" size="80" /></div>
+        <div><button id="filter-bibtex">Filter your BibTeX</button></div>
+        <div><label>Copy the results</label><br /><textarea id="output-bibtex" readonly cols="80" rows="30"></textarea></div>
+        <div><label>Example command line usage</label><br /><input id="cmd-example-bibtex" type="text" readonly value="" size="80" /></div>
+    </section>
+    <footer>
+    <span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
+    <span>&copy; 2016 <a href="http://library.caltech.edu/CLS_Copyright.htm">Caltech library</a></span>
+    <address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address> 
+    <span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+    <span><a href="mailto:library@caltech.edu">Email Us</a></span>
+    </footer>
+    <script src="webapp.js"></script>
+    <script src="bibfilter.js"></script>
+</body>
+</html>
