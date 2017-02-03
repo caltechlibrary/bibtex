@@ -1,9 +1,9 @@
 
 + [Home](/)
 + [README](../)
-+ [BibTeX web tools](./)
 + [INSTALL](../install.html)
 + [LICENSE](../license.html)
++ [BibTeX web tools](./)
 + [bibmerge](../bibmerge.html)
 + [bibfilter](../bibfilter.html)
 + [bibscrape](../bibscrape.html)
