@@ -25,30 +25,32 @@
 </nav>
 
 <section>
-<p>USAGE bibscrape [OPTIONS] FILENAME</p>
+<h1>USAGE</h1>
+
+<pre><code>bibscrape [OPTIONS] FILENAME
+</code></pre>
 
 <p>Parse the plain text file for BibTeX entry making a best guess
- to generate pseudo bib entries that can import into JabRef for
- cleanup.</p>
+to generate pseudo bib entries that can import into JabRef for
+cleanup.</p>
 
-<p>OPTIONS</p>
+<h2>OPTIONS</h2>
 
-<p>-e Set the default entry separator (defaults to \n\n)
+<pre><code>   -e Set the default entry separator (defaults to \n\n)
    -h display help
    -k add a missing key
    -l display license
    -t Set the entry type  (defaults to pseudo)
-   -v display version</p>
-
-<p>EXAMPLE</p>
-
-<pre><code>Use an 4 digit ID number and period to indicate the start of my bib
-records.
-
-    bibscrape -entry-separator &quot;[0-9][0-9]0-9][0-9]\.\n&quot; mytest.bib
+   -v display version
 </code></pre>
 
-<p>Version v0.0.8</p>
+<h2>EXAMPLE</h2>
+
+<p>Use an 4 digit ID number and period to indicate the start of my bib
+records.</p>
+
+<pre><code>    bibscrape -entry-separator &quot;[0-9][0-9]0-9][0-9]\.\n&quot; mytest.bib
+</code></pre>
 
 </section>
 

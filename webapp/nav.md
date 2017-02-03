@@ -1,7 +1,10 @@
 
 + [Home](/)
-+ [bibtex](../)
++ [README](../)
 + [BibTeX web tools](./)
 + [INSTALL](../install.html)
 + [LICENSE](../license.html)
++ [bibmerge](../bibmerge.html)
++ [bibfilter](../bibfilter.html)
++ [bibscrape](../bibscrape.html)
 + [Github](https://github.com/caltechlibrary/bibtex)
