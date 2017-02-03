@@ -28,3 +28,6 @@ echo "Generating website"
 mkPage nav.md README.md index.html
 mkPage nav.md INSTALL.md install.html
 mkPage nav.md "markdown:$(cat LICENSE)" license.html
+for FNAME in bibfilter bibmerge bibscrape; do
+    mkPage nav.md $FNAME.md $FNAME.html
+done
