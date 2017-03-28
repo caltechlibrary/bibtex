@@ -10,6 +10,10 @@ JavaScript via GopherJS. A web version of *bibfiter* and *bibmerge* commands is 
 [webapp](webapp/) directory. The command line utilities and webapp use
 the same *bibtex* golang package for implementation.
 
+Compiled versions are provided for Linux (amd64), Mac OS X (amd64), Windows 10 (amd64) and Raspbian (ARM7). 
+See https://github.com/caltechlibrary/bibtex/releases.
+
+
 
 ## bibfilter
 
