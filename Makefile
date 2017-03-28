@@ -24,7 +24,7 @@ status:
 	git status
 
 save:
-	git commit -am "Quick save"
+	if [ "$(pwd)" != "" ]; then git commit -am "$(msg)"; else git commit -am "Quick save"; fi
 	git push origin $(BRANCH)
 
 clean:
