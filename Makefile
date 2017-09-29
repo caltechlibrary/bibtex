@@ -13,9 +13,9 @@ build: bibtex.go cmds/bibfilter/bibfilter.go cmds/bibmerge/bibmerge.go cmds/bibs
 	env CGO_ENABLED=0 go build -o bin/bibscrape cmds/bibscrape/bibscrape.go
 
 install:
-	env CGO_ENABLED=0 GOBIN=$(HOME)/bin go install cmds/bibfilter/bibfilter.go
-	env CGO_ENABLED=0 GOBIN=$(HOME)/bin go install cmds/bibmerge/bibmerge.go
-	env CGO_ENABLED=0 GOBIN=$(HOME)/bin go install cmds/bibscrape/bibscrape.go
+	env CGO_ENABLED=0 GOBIN=$(GOPATH)/bin go install cmds/bibfilter/bibfilter.go
+	env CGO_ENABLED=0 GOBIN=$(GOPATH)/bin go install cmds/bibmerge/bibmerge.go
+	env CGO_ENABLED=0 GOBIN=$(GOPATH)/bin go install cmds/bibscrape/bibscrape.go
 
 test:
 	go test
