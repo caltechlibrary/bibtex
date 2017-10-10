@@ -32,9 +32,11 @@ import (
 )
 
 var (
-	showHelp    bool
-	showVersion bool
-	showLicense bool
+	// Standard Options
+	showHelp     bool
+	showVersion  bool
+	showLicense  bool
+	showExamples bool
 
 	entrySeparator = "(\n|\r\n)"
 	useType        = `pseudo`
@@ -42,24 +44,26 @@ var (
 
 	usage = `USAGE: %s [OPTIONS] FILENAME`
 
-	description = `
-SYSNOPSIS
+	description = `SYSNOPSIS
 
-%s parses a plain text file for BibTeX entry making a best guess to generate pseudo bib entries that can import into JabRef for clea
-`
+%s parses a plain text file for BibTeX entry making a best guess to generate pseudo bib entries that can import into JabRef for clea`
 
-	examples = `
-EXAMPLES
+	examples = `EXAMPLES
 
-    %s -entry-separator "[0-9][0-9]0-9][0-9]\.\n" mytest.bib
-`
+    %s -entry-separator "[0-9][0-9]0-9][0-9]\.\n" mytest.bib`
 )
 
 func init() {
+	// Standard Options
 	flag.BoolVar(&showHelp, "h", false, "display help")
+	flag.BoolVar(&showHelp, "help", false, "display help")
 	flag.BoolVar(&showVersion, "v", false, "display version")
+	flag.BoolVar(&showVersion, "version", false, "display version")
 	flag.BoolVar(&showLicense, "l", false, "display license")
+	flag.BoolVar(&showLicense, "license", false, "display license")
+	flag.BoolVar(&showExamples, "example", false, "display example(s)")
 
+	// Application Options
 	flag.BoolVar(&addKeys, "k", false, "add a missing key")
 	flag.StringVar(&entrySeparator, "e", entrySeparator, `Set the default entry separator (defaults to \n\n)`)
 	flag.StringVar(&useType, "t", useType, `Set the entry type  (defaults to pseudo)`)
@@ -69,15 +73,31 @@ func main() {
 	pseudo_id := 0
 	appName := path.Base(os.Args[0])
 	flag.Parse()
+	args := flag.Args()
 
 	// Configuration and command line interation
-	cfg := cli.New(appName, appName, fmt.Sprintf(bibtex.LicenseText, appName, bibtex.Version), bibtex.Version)
+	cfg := cli.New(appName, appName, bibtex.Version)
+	cfg.LicenseText = fmt.Sprintf(bibtex.LicenseText, appName, bibtex.Version)
 	cfg.UsageText = fmt.Sprintf(usage, appName)
 	cfg.DescriptionText = fmt.Sprintf(description, appName)
+	cfg.OptionText = "OPTIONS\n\n"
 	cfg.ExampleText = fmt.Sprintf(examples, appName)
 
 	if showHelp == true {
-		fmt.Println(cfg.Usage())
+		if len(args) > 0 {
+			fmt.Println(cfg.Help(args...))
+		} else {
+			fmt.Println(cfg.Usage())
+		}
+		os.Exit(0)
+	}
+
+	if showExamples == true {
+		if len(args) > 0 {
+			fmt.Println(cfg.Example(args...))
+		} else {
+			fmt.Println(cfg.ExampleText)
+		}
 		os.Exit(0)
 	}
 
@@ -126,7 +146,6 @@ func main() {
 		}
 	}
 
-	args := flag.Args()
 	for _, fname := range args {
 		scrapeFile(fname, reEntrySeparator)
 	}

@@ -33,35 +33,40 @@ import (
 )
 
 var (
-	showHelp    bool
-	showVersion bool
-	showLicense bool
+	// Standard Options
+	showHelp     bool
+	showVersion  bool
+	showLicense  bool
+	showExamples bool
 
+	// Application Options
 	include = bibtex.DefaultInclude
 	exclude = ""
 
 	usage = `USAGE: %s [OPTION] BIBFILE`
 
-	description = `
-SYSNOPSIS
+	description = `SYSNOPSIS
 
-%s filters BibTeX files by entry type.
-`
+%s filters BibTeX files by entry type.`
 
-	examples = `
-EXAMPLES
+	examples = `EXAMPLES
 	
 	%s -include author,title my-works.bib
 
-Renders a BibTeX file containing only author and title from my-works.bib
-`
+Renders a BibTeX file containing only author and title from my-works.bib`
 )
 
 func init() {
-	flag.BoolVar(&showHelp, "h", false, "display help information")
-	flag.BoolVar(&showVersion, "v", false, "display version information")
+	// Standard Options
+	flag.BoolVar(&showHelp, "h", false, "display help")
+	flag.BoolVar(&showHelp, "help", false, "display help")
+	flag.BoolVar(&showVersion, "v", false, "display version")
+	flag.BoolVar(&showVersion, "version", false, "display version")
 	flag.BoolVar(&showLicense, "l", false, "display license")
+	flag.BoolVar(&showLicense, "license", false, "display license")
+	flag.BoolVar(&showExamples, "example", false, "display example(s)")
 
+	// Application Options
 	flag.StringVar(&include, "include", include, "a comma separated list of tags to include")
 	flag.StringVar(&exclude, "exclude", exclude, "a comma separated list of tags to exclude")
 }
@@ -69,15 +74,30 @@ func init() {
 func main() {
 	appName := path.Base(os.Args[0])
 	flag.Parse()
+	args := flag.Args()
 
 	// Configuration and command line interation
-	cfg := cli.New(appName, appName, fmt.Sprintf(bibtex.LicenseText, appName, bibtex.Version), bibtex.Version)
+	cfg := cli.New(appName, strings.ToUpper(appName), bibtex.Version)
+	cfg.LicenseText = fmt.Sprintf(bibtex.LicenseText, appName, bibtex.Version)
 	cfg.UsageText = fmt.Sprintf(usage, appName)
 	cfg.DescriptionText = fmt.Sprintf(description, appName)
+	cfg.OptionText = "OPTIONS\n\n"
 	cfg.ExampleText = fmt.Sprintf(examples, appName)
 
 	if showHelp == true {
-		fmt.Println(cfg.Usage())
+		if len(args) > 0 {
+			fmt.Println(cfg.Help(args...))
+		} else {
+			fmt.Println(cfg.Usage())
+		}
+		os.Exit(0)
+	}
+	if showExamples == true {
+		if len(args) > 0 {
+			fmt.Println(cfg.Example(args...))
+		} else {
+			fmt.Println(cfg.ExampleText)
+		}
 		os.Exit(0)
 	}
 
@@ -100,7 +120,6 @@ func main() {
 	in := os.Stdin
 	out := os.Stdout
 
-	args := flag.Args()
 	if len(args) > 0 {
 		fname := args[0]
 		args = args[1:]

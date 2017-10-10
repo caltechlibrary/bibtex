@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 
 	// Caltech Library packages
 	"github.com/caltechlibrary/bibtex"
@@ -31,9 +32,10 @@ import (
 )
 
 var (
-	showHelp    bool
-	showVersion bool
-	showLicense bool
+	showHelp     bool
+	showVersion  bool
+	showLicense  bool
+	showExamples bool
 
 	mergeJoin      bool
 	mergeDiff      bool
@@ -59,10 +61,16 @@ Combine to BibTeX files into one using join.
 )
 
 func init() {
-	flag.BoolVar(&showHelp, "h", false, "display help information")
-	flag.BoolVar(&showVersion, "v", false, "display version information")
+	// Standard Options
+	flag.BoolVar(&showHelp, "h", false, "display help")
+	flag.BoolVar(&showHelp, "help", false, "display help")
+	flag.BoolVar(&showVersion, "v", false, "display version")
+	flag.BoolVar(&showVersion, "version", false, "display version")
 	flag.BoolVar(&showLicense, "l", false, "display license")
+	flag.BoolVar(&showLicense, "license", false, "display license")
+	flag.BoolVar(&showExamples, "example", false, "display example(s)")
 
+	// Application Options
 	flag.BoolVar(&mergeJoin, "join", false, "join two bib files")
 	flag.BoolVar(&mergeDiff, "diff", false, "take the difference (asymmetric) between two bib files")
 	flag.BoolVar(&mergeIntersect, "intersect", false, "generate a bib listing from the intersection of two bib files")
@@ -72,15 +80,31 @@ func init() {
 func main() {
 	appName := path.Base(os.Args[0])
 	flag.Parse()
+	args := flag.Args()
 
 	// Configuration and command line interation
-	cfg := cli.New(appName, appName, fmt.Sprintf(bibtex.LicenseText, appName, bibtex.Version), bibtex.Version)
+	cfg := cli.New(appName, strings.ToUpper(appName), bibtex.Version)
+	cfg.LicenseText = fmt.Sprintf(bibtex.LicenseText, appName, bibtex.Version)
 	cfg.UsageText = fmt.Sprintf(usage, appName)
 	cfg.DescriptionText = fmt.Sprintf(description, appName)
+	cfg.OptionText = "OPTIONS\n\n"
 	cfg.ExampleText = fmt.Sprintf(examples, appName)
 
 	if showHelp == true {
-		fmt.Println(cfg.Usage())
+		if len(args) > 0 {
+			fmt.Println(cfg.Help(args...))
+		} else {
+			fmt.Println(cfg.Usage())
+		}
+		os.Exit(0)
+	}
+
+	if showExamples == true {
+		if len(args) > 0 {
+			fmt.Println(cfg.Example(args...))
+		} else {
+			fmt.Println(cfg.ExampleText)
+		}
 		os.Exit(0)
 	}
 
@@ -101,7 +125,6 @@ func main() {
 		listC []*bibtex.Element
 	)
 
-	args := flag.Args()
 	if len(args) != 2 {
 		fmt.Fprintf(os.Stderr, "Must include two BibTeX filenames, try %s -h for details", appName)
 		os.Exit(1)
