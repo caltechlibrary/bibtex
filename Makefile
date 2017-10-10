@@ -8,14 +8,14 @@ VERSION = $(shell grep -m 1 'Version =' $(PROJECT).go | cut -d\" -f 2)
 BRANCH = $(shell git branch | grep '* ' | cut -d\  -f 2)
 
 build: bibtex.go cmds/bibfilter/bibfilter.go cmds/bibmerge/bibmerge.go cmds/bibscrape/bibscrape.go
-	env CGO_ENABLED=0 go build -o bin/bibfilter cmds/bibfilter/bibfilter.go
-	env CGO_ENABLED=0 go build -o bin/bibmerge cmds/bibmerge/bibmerge.go
-	env CGO_ENABLED=0 go build -o bin/bibscrape cmds/bibscrape/bibscrape.go
+	go build -o bin/bibfilter cmds/bibfilter/bibfilter.go
+	go build -o bin/bibmerge cmds/bibmerge/bibmerge.go
+	go build -o bin/bibscrape cmds/bibscrape/bibscrape.go
 
 install:
-	env CGO_ENABLED=0 GOBIN=$(GOPATH)/bin go install cmds/bibfilter/bibfilter.go
-	env CGO_ENABLED=0 GOBIN=$(GOPATH)/bin go install cmds/bibmerge/bibmerge.go
-	env CGO_ENABLED=0 GOBIN=$(GOPATH)/bin go install cmds/bibscrape/bibscrape.go
+	env GOBIN=$(GOPATH)/bin go install cmds/bibfilter/bibfilter.go
+	env GOBIN=$(GOPATH)/bin go install cmds/bibmerge/bibmerge.go
+	env GOBIN=$(GOPATH)/bin go install cmds/bibscrape/bibscrape.go
 
 test:
 	go test
