@@ -45,18 +45,22 @@ var (
 	usage = `USAGE: %s [OPTIONS] BIB_FILE1 BIB_FILE2`
 
 	description = `
+
 SYNOPSIS
 
 %s will merge combine two BibTeX files via one of the following
 operations -diff, -exclusive, -intersect or -join.
+
 `
 
 	examples = `
+
 EXAMPLES
 
     %s -join my-old-articles.bib my-recent-articles.bib
 
 Combine to BibTeX files into one using join.
+
 `
 )
 

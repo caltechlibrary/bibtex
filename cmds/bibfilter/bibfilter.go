@@ -45,15 +45,23 @@ var (
 
 	usage = `USAGE: %s [OPTION] BIBFILE`
 
-	description = `SYSNOPSIS
+	description = `
 
-%s filters BibTeX files by entry type.`
+SYSNOPSIS
 
-	examples = `EXAMPLES
+%s filters BibTeX files by entry type.
+
+`
+
+	examples = `
+
+EXAMPLES
 	
 	%s -include author,title my-works.bib
 
-Renders a BibTeX file containing only author and title from my-works.bib`
+Renders a BibTeX file containing only author and title from my-works.bib
+
+`
 )
 
 func init() {

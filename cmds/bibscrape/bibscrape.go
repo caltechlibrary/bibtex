@@ -44,13 +44,21 @@ var (
 
 	usage = `USAGE: %s [OPTIONS] FILENAME`
 
-	description = `SYSNOPSIS
+	description = `
 
-%s parses a plain text file for BibTeX entry making a best guess to generate pseudo bib entries that can import into JabRef for clea`
+SYSNOPSIS
 
-	examples = `EXAMPLES
+%s parses a plain text file for BibTeX entry making a best guess to generate pseudo bib entries 
+that can import into JabRef for cleaning
 
-    %s -entry-separator "[0-9][0-9]0-9][0-9]\.\n" mytest.bib`
+`
+
+	examples = `
+EXAMPLES
+
+    %s -entry-separator "[0-9][0-9]0-9][0-9]\.\n" mytest.bib
+
+`
 )
 
 func init() {
