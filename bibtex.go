@@ -32,7 +32,7 @@ import (
 
 const (
 	// Version of BibTeX package
-	Version = "v0.0.8"
+	Version = `v0.0.8`
 
 	// LicenseText holds the text for displaying license info
 	LicenseText = `
