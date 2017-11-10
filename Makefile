@@ -52,6 +52,7 @@ release: dist/linux-amd64 dist/windows-amd64 dist/macosx-amd64 dist/raspbian-arm
 	cp -v bibfilter.md dist/
 	cp -v bibmerge.md dist/
 	cp -v bibscrape.md dist/
+	./package-versions.bash > dist/package-versions.txt
 	zip -r $(PROJECT)-$(VERSION)-release.zip dist/*
 
 dist/linux-amd64:
