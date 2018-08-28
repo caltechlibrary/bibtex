@@ -7,15 +7,15 @@ VERSION = $(shell grep -m 1 'Version =' $(PROJECT).go | cut -d\` -f 2)
 
 BRANCH = $(shell git branch | grep '* ' | cut -d\  -f 2)
 
-build: bibtex.go cmds/bibfilter/bibfilter.go cmds/bibmerge/bibmerge.go cmds/bibscrape/bibscrape.go
-	go build -o bin/bibfilter cmds/bibfilter/bibfilter.go
-	go build -o bin/bibmerge cmds/bibmerge/bibmerge.go
-	go build -o bin/bibscrape cmds/bibscrape/bibscrape.go
+build: bibtex.go cmd/bibfilter/bibfilter.go cmd/bibmerge/bibmerge.go cmd/bibscrape/bibscrape.go
+	go build -o bin/bibfilter cmd/bibfilter/bibfilter.go
+	go build -o bin/bibmerge cmd/bibmerge/bibmerge.go
+	go build -o bin/bibscrape cmd/bibscrape/bibscrape.go
 
 install:
-	env GOBIN=$(GOPATH)/bin go install cmds/bibfilter/bibfilter.go
-	env GOBIN=$(GOPATH)/bin go install cmds/bibmerge/bibmerge.go
-	env GOBIN=$(GOPATH)/bin go install cmds/bibscrape/bibscrape.go
+	env GOBIN=$(GOPATH)/bin go install cmd/bibfilter/bibfilter.go
+	env GOBIN=$(GOPATH)/bin go install cmd/bibmerge/bibmerge.go
+	env GOBIN=$(GOPATH)/bin go install cmd/bibscrape/bibscrape.go
 
 test:
 	go test
@@ -56,23 +56,23 @@ release: dist/linux-amd64 dist/windows-amd64 dist/macosx-amd64 dist/raspbian-arm
 	zip -r $(PROJECT)-$(VERSION)-release.zip dist/*
 
 dist/linux-amd64:
-	env GOOS=linux GOARCH=amd64 go build -o dist/linux-amd64/bibfilter cmds/bibfilter/bibfilter.go
-	env GOOS=linux GOARCH=amd64 go build -o dist/linux-amd64/bibmerge cmds/bibmerge/bibmerge.go
-	env GOOS=linux GOARCH=amd64 go build -o dist/linux-amd64/bibscrape cmds/bibscrape/bibscrape.go
+	env GOOS=linux GOARCH=amd64 go build -o dist/linux-amd64/bibfilter cmd/bibfilter/bibfilter.go
+	env GOOS=linux GOARCH=amd64 go build -o dist/linux-amd64/bibmerge cmd/bibmerge/bibmerge.go
+	env GOOS=linux GOARCH=amd64 go build -o dist/linux-amd64/bibscrape cmd/bibscrape/bibscrape.go
 
 dist/windows-amd64:
-	env GOOS=windows GOARCH=amd64 go build -o dist/windows-amd64/bibfilter.exe cmds/bibfilter/bibfilter.go
-	env GOOS=windows GOARCH=amd64 go build -o dist/windows-amd64/bibmerge.exe cmds/bibmerge/bibmerge.go
-	env GOOS=windows GOARCH=amd64 go build -o dist/windows-amd64/bibscrape.exe cmds/bibscrape/bibscrape.go
+	env GOOS=windows GOARCH=amd64 go build -o dist/windows-amd64/bibfilter.exe cmd/bibfilter/bibfilter.go
+	env GOOS=windows GOARCH=amd64 go build -o dist/windows-amd64/bibmerge.exe cmd/bibmerge/bibmerge.go
+	env GOOS=windows GOARCH=amd64 go build -o dist/windows-amd64/bibscrape.exe cmd/bibscrape/bibscrape.go
 
 dist/macosx-amd64:
-	env GOOS=darwin	GOARCH=amd64 go build -o dist/macosx-amd64/bibfilter cmds/bibfilter/bibfilter.go
-	env GOOS=darwin	GOARCH=amd64 go build -o dist/macosx-amd64/bibmerge cmds/bibmerge/bibmerge.go
-	env GOOS=darwin	GOARCH=amd64 go build -o dist/macosx-amd64/bibscrape cmds/bibscrape/bibscrape.go
+	env GOOS=darwin	GOARCH=amd64 go build -o dist/macosx-amd64/bibfilter cmd/bibfilter/bibfilter.go
+	env GOOS=darwin	GOARCH=amd64 go build -o dist/macosx-amd64/bibmerge cmd/bibmerge/bibmerge.go
+	env GOOS=darwin	GOARCH=amd64 go build -o dist/macosx-amd64/bibscrape cmd/bibscrape/bibscrape.go
 
 
 dist/raspbian-arm7:
-	env GOOS=linux GOARCH=arm GOARM=7 go build -o dist/raspberrypi-arm7/bibfilter cmds/bibfilter/bibfilter.go
-	env GOOS=linux GOARCH=arm GOARM=7 go build -o dist/raspberrypi-arm7/bibmerge cmds/bibmerge/bibmerge.go
-	env GOOS=linux GOARCH=arm GOARM=7 go build -o dist/raspberrypi-arm7/bibscrape cmds/bibscrape/bibscrape.go
+	env GOOS=linux GOARCH=arm GOARM=7 go build -o dist/raspberrypi-arm7/bibfilter cmd/bibfilter/bibfilter.go
+	env GOOS=linux GOARCH=arm GOARM=7 go build -o dist/raspberrypi-arm7/bibmerge cmd/bibmerge/bibmerge.go
+	env GOOS=linux GOARCH=arm GOARM=7 go build -o dist/raspberrypi-arm7/bibscrape cmd/bibscrape/bibscrape.go
 

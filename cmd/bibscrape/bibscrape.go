@@ -18,11 +18,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"regexp"
 
 	// Caltech Library Packages
@@ -33,89 +31,104 @@ import (
 
 var (
 	// Standard Options
-	showHelp     bool
-	showVersion  bool
-	showLicense  bool
-	showExamples bool
+	showHelp         bool
+	showVersion      bool
+	showLicense      bool
+	showExamples     bool
+	inputFName       string
+	outputFName      string
+	quiet            bool
+	newLine          bool
+	generateMarkdown bool
+	generateManPage  bool
 
 	entrySeparator = "(\n|\r\n)"
 	useType        = `pseudo`
 	addKeys        bool
 
-	usage = `USAGE: %s [OPTIONS] FILENAME`
+	synopsis = `
+parse plain text making a best guess to generate pseudo bib entries
+`
 
 	description = `
-
-SYSNOPSIS
-
-%s parses a plain text file for BibTeX entry making a best guess to generate pseudo bib entries 
+_bibscrape_ parses a plain text file for BibTeX entry making a best guess to generate pseudo bib entries 
 that can import into JabRef for cleaning
-
 `
 
 	examples = `
-EXAMPLES
-
-    %s -entry-separator "[0-9][0-9]0-9][0-9]\.\n" mytest.bib
-
+` + "```" + `
+    bibscrape -entry-separator "[0-9][0-9]0-9][0-9]\.\n" mytest.bib
+` + "```" + `
 `
 )
 
-func init() {
-	// Standard Options
-	flag.BoolVar(&showHelp, "h", false, "display help")
-	flag.BoolVar(&showHelp, "help", false, "display help")
-	flag.BoolVar(&showVersion, "v", false, "display version")
-	flag.BoolVar(&showVersion, "version", false, "display version")
-	flag.BoolVar(&showLicense, "l", false, "display license")
-	flag.BoolVar(&showLicense, "license", false, "display license")
-	flag.BoolVar(&showExamples, "example", false, "display example(s)")
-
-	// Application Options
-	flag.BoolVar(&addKeys, "k", false, "add a missing key")
-	flag.StringVar(&entrySeparator, "e", entrySeparator, `Set the default entry separator (defaults to \n\n)`)
-	flag.StringVar(&useType, "t", useType, `Set the entry type  (defaults to pseudo)`)
-}
-
 func main() {
 	pseudo_id := 0
-	appName := path.Base(os.Args[0])
-	flag.Parse()
-	args := flag.Args()
 
-	// Configuration and command line interation
-	cfg := cli.New(appName, appName, bibtex.Version)
-	cfg.LicenseText = fmt.Sprintf(bibtex.LicenseText, appName, bibtex.Version)
-	cfg.UsageText = fmt.Sprintf(usage, appName)
-	cfg.DescriptionText = fmt.Sprintf(description, appName)
-	cfg.OptionText = "OPTIONS\n\n"
-	cfg.ExampleText = fmt.Sprintf(examples, appName)
+	app := cli.NewCli(bibtex.Version)
+	app.AddParams("[OPTIONS]", "FILENAME")
 
-	if showHelp == true {
+	// Add Help Docs
+	app.SectionNo = 1 // Manual page section number to document
+	app.AddHelp("synopsis", []byte(synopsis))
+	app.AddHelp("description", []byte(description))
+	app.AddHelp("examples", []byte(examples))
+
+	// Standard Options
+	app.BoolVar(&showHelp, "h,help", false, "display help")
+	app.BoolVar(&showLicense, "l,license", false, "display license")
+	app.BoolVar(&showVersion, "v,version", false, "display version")
+	app.BoolVar(&showExamples, "examples", false, "display examples")
+	app.StringVar(&inputFName, "i,input", "", "input file name")
+	app.StringVar(&outputFName, "o,output", "", "output file name")
+	app.BoolVar(&newLine, "nl,newline", false, "if true add a trailing newline")
+	app.BoolVar(&quiet, "quiet", false, "suppress error messages")
+	app.BoolVar(&generateMarkdown, "generate-markdown", false, "generate markdown documentation")
+	app.BoolVar(&generateManPage, "generate-manpage", false, "generate man page")
+
+	// Application Options
+	app.BoolVar(&addKeys, "k", false, "add a missing key")
+	app.StringVar(&entrySeparator, "e,entry-separator", entrySeparator, `Set the default entry separator (defaults to \n\n)`)
+	app.StringVar(&useType, "t", useType, `Set the entry type  (defaults to pseudo)`)
+
+	// We're ready to process args
+	app.Parse()
+	args := app.Args()
+
+	// Setup IO
+	var err error
+
+	app.Eout = os.Stderr
+	app.In, err = cli.Open(inputFName, os.Stdin)
+	cli.ExitOnError(app.Eout, err, quiet)
+	defer cli.CloseFile(inputFName, app.In)
+
+	app.Out, err = cli.Create(outputFName, os.Stdout)
+	cli.ExitOnError(app.Eout, err, quiet)
+	defer cli.CloseFile(outputFName, app.Out)
+	// Handle options
+	if generateMarkdown {
+		app.GenerateMarkdown(app.Out)
+		os.Exit(0)
+	}
+	if generateManPage {
+		app.GenerateManPage(app.Out)
+		os.Exit(0)
+	}
+	if showHelp || showExamples {
 		if len(args) > 0 {
-			fmt.Println(cfg.Help(args...))
+			fmt.Fprintf(app.Out, app.Help(args...))
 		} else {
-			fmt.Println(cfg.Usage())
+			app.Usage(app.Out)
 		}
 		os.Exit(0)
 	}
-
-	if showExamples == true {
-		if len(args) > 0 {
-			fmt.Println(cfg.Example(args...))
-		} else {
-			fmt.Println(cfg.ExampleText)
-		}
+	if showLicense {
+		fmt.Fprintln(app.Out, app.License())
 		os.Exit(0)
 	}
-
-	if showLicense == true {
-		fmt.Println(cfg.License())
-		os.Exit(0)
-	}
-
-	if showVersion == true {
-		fmt.Println(cfg.Version())
+	if showVersion {
+		fmt.Fprintln(app.Out, app.Version())
 		os.Exit(0)
 	}
 
@@ -130,7 +143,7 @@ func main() {
 		)
 		buf, err = ioutil.ReadFile(fname)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s", err)
+			fmt.Fprintf(app.Eout, "%s", err)
 			os.Exit(1)
 		}
 		for {
@@ -144,7 +157,7 @@ func main() {
 					elem.Keys = append(elem.Keys, fmt.Sprintf("pseudo_id_%d", pseudo_id))
 					pseudo_id++
 				}
-				fmt.Fprintf(os.Stdout, "%s\n\n", elem)
+				fmt.Fprintf(app.Out, "%s\n\n", elem)
 			}
 			entry = nil
 			elem = nil
@@ -156,5 +169,8 @@ func main() {
 
 	for _, fname := range args {
 		scrapeFile(fname, reEntrySeparator)
+	}
+	if newLine {
+		fmt.Fprintf(app.Out, "\n")
 	}
 }

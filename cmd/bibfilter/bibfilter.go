@@ -20,11 +20,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"strings"
 
 	// Caltech Library packages
@@ -34,99 +32,111 @@ import (
 
 var (
 	// Standard Options
-	showHelp     bool
-	showVersion  bool
-	showLicense  bool
-	showExamples bool
+	showHelp         bool
+	showVersion      bool
+	showLicense      bool
+	showExamples     bool
+	newLine          bool
+	generateMarkdown bool
+	generateManPage  bool
+	inputFName       string
+	outputFName      string
+	quiet            bool
 
 	// Application Options
 	include = bibtex.DefaultInclude
 	exclude = ""
 
-	usage = `USAGE: %s [OPTION] BIBFILE`
+	synopsis = `filter a bibTeX file for specific fields`
 
 	description = `
-
-SYSNOPSIS
-
-%s filters BibTeX files by entry type.
-
+_bibfilter_ filters BibTeX files by entry type.
 `
 
 	examples = `
-
-EXAMPLES
-	
-	%s -include author,title my-works.bib
-
-Renders a BibTeX file containing only author and title from my-works.bib
-
+` + "```" + `
+	bibfilter -include article,book my-works.bib
+` + "```" + `
+Renders a BibTeX file containing only article and book from my-works.bib
 `
 )
 
-func init() {
+func main() {
+	// Configuration and command line interation
+	app := cli.NewCli(bibtex.Version)
+	app.AddParams("[OPTIONS]", "BIBFILE")
+
+	// Add Help Docs
+	app.SectionNo = 1 // Manual page section number to document
+	app.AddHelp("synopsis", []byte(synopsis))
+	app.AddHelp("description", []byte(description))
+	app.AddHelp("examples", []byte(examples))
+
 	// Standard Options
-	flag.BoolVar(&showHelp, "h", false, "display help")
-	flag.BoolVar(&showHelp, "help", false, "display help")
-	flag.BoolVar(&showVersion, "v", false, "display version")
-	flag.BoolVar(&showVersion, "version", false, "display version")
-	flag.BoolVar(&showLicense, "l", false, "display license")
-	flag.BoolVar(&showLicense, "license", false, "display license")
-	flag.BoolVar(&showExamples, "example", false, "display example(s)")
+	app.BoolVar(&showHelp, "h,help", false, "display help")
+	app.BoolVar(&showLicense, "l,license", false, "display license")
+	app.BoolVar(&showVersion, "v,version", false, "display version")
+	app.BoolVar(&showExamples, "examples", false, "display examples")
+	app.StringVar(&inputFName, "i,input", "", "input file name")
+	app.StringVar(&outputFName, "o,output", "", "output file name")
+	app.BoolVar(&newLine, "nl,newline", false, "if true add a trailing newline")
+	app.BoolVar(&quiet, "quiet", false, "suppress error messages")
+	app.BoolVar(&generateMarkdown, "generate-markdown", false, "generate markdown documentation")
+	app.BoolVar(&generateManPage, "generate-manpage", false, "generate man page")
 
 	// Application Options
-	flag.StringVar(&include, "include", include, "a comma separated list of tags to include")
-	flag.StringVar(&exclude, "exclude", exclude, "a comma separated list of tags to exclude")
-}
+	app.StringVar(&include, "include", include, "a comma separated list of entry type(s) to include")
+	app.StringVar(&exclude, "exclude", exclude, "a comma separated list of entry type(s) to exclude")
 
-func main() {
-	appName := path.Base(os.Args[0])
-	flag.Parse()
-	args := flag.Args()
+	// We're ready to process args
+	app.Parse()
+	args := app.Args()
 
-	// Configuration and command line interation
-	cfg := cli.New(appName, strings.ToUpper(appName), bibtex.Version)
-	cfg.LicenseText = fmt.Sprintf(bibtex.LicenseText, appName, bibtex.Version)
-	cfg.UsageText = fmt.Sprintf(usage, appName)
-	cfg.DescriptionText = fmt.Sprintf(description, appName)
-	cfg.OptionText = "OPTIONS\n\n"
-	cfg.ExampleText = fmt.Sprintf(examples, appName)
+	// Setup IO
+	var err error
 
-	if showHelp == true {
+	app.Eout = os.Stderr
+	app.In, err = cli.Open(inputFName, os.Stdin)
+	cli.ExitOnError(app.Eout, err, quiet)
+	defer cli.CloseFile(inputFName, app.In)
+
+	app.Out, err = cli.Create(outputFName, os.Stdout)
+	cli.ExitOnError(app.Eout, err, quiet)
+	defer cli.CloseFile(outputFName, app.Out)
+
+	// Handle options
+	if generateMarkdown {
+		app.GenerateMarkdown(app.Out)
+		os.Exit(0)
+	}
+	if generateManPage {
+		app.GenerateManPage(app.Out)
+		os.Exit(0)
+	}
+	if showHelp || showExamples {
 		if len(args) > 0 {
-			fmt.Println(cfg.Help(args...))
+			fmt.Fprintf(app.Out, app.Help(args...))
 		} else {
-			fmt.Println(cfg.Usage())
+			app.Usage(app.Out)
 		}
 		os.Exit(0)
 	}
-	if showExamples == true {
-		if len(args) > 0 {
-			fmt.Println(cfg.Example(args...))
-		} else {
-			fmt.Println(cfg.ExampleText)
-		}
+	if showLicense {
+		fmt.Fprintln(app.Out, app.License())
 		os.Exit(0)
 	}
-
-	if showVersion == true {
-		fmt.Println(cfg.Version())
-		os.Exit(0)
-	}
-
-	if showLicense == true {
-		fmt.Println(cfg.License())
+	if showVersion {
+		fmt.Fprintln(app.Out, app.Version())
 		os.Exit(0)
 	}
 
 	var (
-		err      error
 		elements []*bibtex.Element
 		buf      []byte
 	)
 
-	in := os.Stdin
-	out := os.Stdout
+	in := app.In
+	out := app.Out
 
 	if len(args) > 0 {
 		fname := args[0]
@@ -150,9 +160,9 @@ func main() {
 	if len(args) > 0 {
 		fname := args[0]
 		args = args[1:]
-		out, err := os.Create(fname)
+		out, err = os.Create(fname)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s, %s\n", fname, err)
+			fmt.Fprintf(app.Eout, "%s, %s\n", fname, err)
 		}
 		defer out.Close()
 	}
@@ -165,5 +175,8 @@ func main() {
 				fmt.Fprintf(out, "%s\n", element)
 			}
 		}
+	}
+	if newLine {
+		fmt.Fprintf(out, "\n")
 	}
 }
