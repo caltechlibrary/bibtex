@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	// Caltech Library packages
-	"github.com/caltechlibrary/tok"
+	"github.com/caltechlibrary/bibtex/tok"
 )
 
 // TestBib tests the Bib tokenizer

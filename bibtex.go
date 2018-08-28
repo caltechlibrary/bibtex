@@ -27,7 +27,7 @@ import (
 	"strings"
 
 	// Caltech Library packages
-	"github.com/caltechlibrary/tok"
+	"github.com/caltechlibrary/bibtex/tok"
 )
 
 const (
