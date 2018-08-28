@@ -12,10 +12,20 @@ build: bibtex.go cmd/bibfilter/bibfilter.go cmd/bibmerge/bibmerge.go cmd/bibscra
 	go build -o bin/bibmerge cmd/bibmerge/bibmerge.go
 	go build -o bin/bibscrape cmd/bibscrape/bibscrape.go
 
+man: build
+	mkdir -p man/man1
+	bin/bibfilter -generate-manpage | nroff -Tutf8 -man > man/man1/bibfilter.1
+	bin/bibmerge -generate-manpage | nroff -Tutf8 -man > man/man1/bibmerge.1
+	bin/bibscrape -generate-manpage | nroff -Tutf8 -man > man/man1/bibscrape.1
+
 install:
 	env GOBIN=$(GOPATH)/bin go install cmd/bibfilter/bibfilter.go
 	env GOBIN=$(GOPATH)/bin go install cmd/bibmerge/bibmerge.go
 	env GOBIN=$(GOPATH)/bin go install cmd/bibscrape/bibscrape.go
+	mkdir -p $(GOPATH)/man/man1
+	$(GOPATH)/bin/bibfilter -generate-manpage | nroff -Tutf8 -man > $(GOPATH)/man/man1/bibfilter.1
+	$(GOPATH)/bin/bibmerge -generate-manpage | nroff -Tutf8 -man > $(GOPATH)/man/man1/bibmerge.1
+	$(GOPATH)/bin/bibscrape -generate-manpage | nroff -Tutf8 -man > $(GOPATH)/man/man1/bibscrape.1
 
 test:
 	go test
