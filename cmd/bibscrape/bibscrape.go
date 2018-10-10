@@ -66,7 +66,7 @@ func main() {
 	pseudo_id := 0
 
 	app := cli.NewCli(bibtex.Version)
-	app.AddParams("FILENAME")
+	app.SetParams("FILENAME")
 
 	// Add Help Docs
 	app.SectionNo = 1 // Manual page section number to document

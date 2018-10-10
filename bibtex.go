@@ -36,7 +36,7 @@ const (
 
 	// LicenseText holds the text for displaying license info
 	LicenseText = `
-%s %
+%s %s
 
 Copyright (c) 2016, Caltech
 All rights not granted herein are expressly reserved by Caltech.

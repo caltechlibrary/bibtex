@@ -64,7 +64,7 @@ Renders a BibTeX file containing only article and book from my-works.bib
 func main() {
 	// Configuration and command line interation
 	app := cli.NewCli(bibtex.Version)
-	app.AddParams("BIBFILE")
+	app.SetParams("BIBFILE")
 
 	// Add Help Docs
 	app.SectionNo = 1 // Manual page section number to document
