@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Caltech Library's Digital Library Development Sandbox</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu"><img src="assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+<li><a href="/">Home</a></li>
+<li><a href="./">README</a></li>
+<li><a href="license.html">LICENSE</a></li>
+<li><a href="install.html">INSTALL</a></li>
+<li><a href="webapp/">BibTeX web tools</a></li>
+<li><a href="bibmerge.html">bibmerge</a></li>
+<li><a href="bibfilter.html">bibfilter</a></li>
+<li><a href="bibscrape.html">bibscrape</a></li>
+<li><a href="https://github.com/caltechlibrary/bibtex">Github</a></li>
+</ul>
+
+</nav>
+
+<section>
+<h1>bibtex</h1>
+
+<p>A Golang BibTeX package and collection of related command line utilities.</p>
+
+<p><a href="https://github.com/caltechlibrary/bibtex">bibtex</a> is a golang package for working with BibTeX files.
+It includes <em>bibfilter</em> and <em>bibmerge</em> which are a command line utilities for working with BibTeX files
+(e.g. removing comments before importing into JabRef, merge bib lists).  <em>bibtex</em> also can be compiled to
+JavaScript via GopherJS. A web version of <em>bibfiter</em> and <em>bibmerge</em> commands is available in the
+<a href="webapp/">webapp</a> directory. The command line utilities and webapp use
+the same <em>bibtex</em> golang package for implementation.</p>
+
+<p>Compiled versions are provided for Linux (amd64), Mac OS X (amd64), Windows 10 (amd64) and Raspbian (ARM7).
+See <a href="https://github.com/caltechlibrary/bibtex/releases">https://github.com/caltechlibrary/bibtex/releases</a>.</p>
+
+<h2>bibfilter</h2>
+
+<p>Output <em>my.bib</em> file without comment entries</p>
+
+<pre><code>  bibfilter -exclude=comment my.bib
+</code></pre>
+
+<p>Output only articles from <em>my.bib</em></p>
+
+<pre><code>    bibfilter -include=article my.bib
+</code></pre>
+
+<p>Output only articles and conference proceedings from <em>my.bib</em></p>
+
+<pre><code>    bibfilter -include=article,inproceedings my.bib
+</code></pre>
+
+<h2>bibmerge</h2>
+
+<p>Output a new bibtex file based on the contents of two other bibtex files.</p>
+
+<p>Join of two bibtex files</p>
+
+<pre><code>    bibmerge -join mybib1.bib mybib2.bib
+</code></pre>
+
+<p>Intersection of two bibtex files</p>
+
+<pre><code>    bibmerge -intersect mybib1.bib mybib2.bib
+</code></pre>
+
+<p>Difference (A - B), includes items in A but not found in B of two bibtex files.</p>
+
+<pre><code>    bibmerge -diff mybib1.bib mybib2.bib
+</code></pre>
+
+<p>Excluse difference (symmetric difference, inverse of intersection) of two bibtex files</p>
+
+<pre><code>    bibmerge -exclusive mybib1.bib mybib2.bib
+</code></pre>
+
+<p>Symmetric versus asymmetric differences</p>
+
+<ol>
+<li>(asymmetric) (A - B)
+
+<ul>
+<li>Content is in A but NOT in B</li>
+<li>Content unique to B would not be included</li>
+</ul></li>
+<li>(symmetric) (A - B) Union (B - A)
+
+<ul>
+<li>Inverse of the the intersection of A and B</li>
+<li>Content unique to A and the content unique to B are included</li>
+</ul></li>
+</ol>
+
+</section>
+
+<footer>
+<span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
+<span>&copy; 2015 - 2017 <a href="https://www.library.caltech.edu/copyright">Caltech library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address> 
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<a class="cl-hide" href="sitemap.xml">Site Map</a>
+</footer>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Caltech Library's Digital Library Development Sandbox</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<header>
+<a href="http://library.caltech.edu"><img src="assets/liblogo.gif" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+<li><a href="/">Home</a></li>
+<li><a href="./">README</a></li>
+<li><a href="license.html">LICENSE</a></li>
+<li><a href="install.html">INSTALL</a></li>
+<li><a href="webapp/">BibTeX web tools</a></li>
+<li><a href="bibmerge.html">bibmerge</a></li>
+<li><a href="bibfilter.html">bibfilter</a></li>
+<li><a href="bibscrape.html">bibscrape</a></li>
+<li><a href="https://github.com/caltechlibrary/bibtex">Github</a></li>
+</ul>
+
+</nav>
+
+<section>
+<h1>USAGE</h1>
+
+<pre><code>bibfilter [OPTION] BIBFILE
+</code></pre>
+
+<h2>SYSNOPSIS</h2>
+
+<p>bibfilter filters BibTeX files by entry type.</p>
+
+<h2>OPTIONS</h2>
+
+<pre><code>	-exclude	a comma separated list of tags to exclude
+	-h	display help information
+	-include	a comma separated list of tags to include
+	-l	display license
+	-v	display version information
+</code></pre>
+
+<h2>EXAMPLES</h2>
+
+<pre><code>	bibfilter -include author,title my-works.bib
+</code></pre>
+
+<p>Renders a BibTeX file containing only author and title from my-works.bib</p>
+
+</section>
+
+<footer>
+<span><h1><A href="http://caltech.edu">Caltech</a></h1></span>
+<span>&copy; 2015 - 2017 <a href="https://www.library.caltech.edu/copyright">Caltech library</a></span>
+<address>1200 E California Blvd, Mail Code 1-32, Pasadena, CA 91125-3200</address> 
+<span>Phone: <a href="tel:+1-626-395-3405">(626)395-3405</a></span>
+<span><a href="mailto:library@caltech.edu">Email Us</a></span>
+<a class="cl-hide" href="sitemap.xml">Site Map</a>
+</footer>
+</body>
+</html>
