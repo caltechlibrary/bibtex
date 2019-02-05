@@ -5,7 +5,7 @@
 
 ## Next Steps
 
-+ [ ] migrate from caltechlibrary/tok to Golang native scanner package
++ [ ] Port GopherJS codebase to WASM, update for Go >= 1.11.5
 
 ## Someday, Maybe
 
@@ -18,3 +18,6 @@
 + for web version bibfilter
     + generate the equavalent command line for current filter settings
 
+## Completed
+
++ [x] migrate from caltechlibrary/tok to Golang native scanner package
